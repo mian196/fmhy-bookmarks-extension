@@ -1,8 +1,8 @@
 /**
  * FMHY Bookmarks Auto-Sync - Background Service Worker
  * Implements 2-Strategy Target Management (Official FMHY vs Personal Fork),
- * automatic GitHub Commit SHA validation on browser startup & periodic alarms,
- * HTML parsing, bookmark replacement, storage state, and notifications.
+ * ETag HTTP caching for rate-limit protection, context menu actions,
+ * automatic GitHub Commit SHA validation, HTML parsing, and bookmark replacement.
  */
 
 if (typeof importScripts === 'function') {
@@ -11,6 +11,7 @@ if (typeof importScripts === 'function') {
 
 const ALARM_NAME = 'fmhy_auto_sync_alarm';
 const CHECK_INTERVAL_MINUTES = 360; // 6 Hours periodic fallback check
+const CONTEXT_MENU_SYNC_ID = 'fmhy_sync_now';
 
 const DEFAULT_SETTINGS = {
   preset: 'full', // 'full' | 'starred'
@@ -48,21 +49,32 @@ async function resolveTargetPaths() {
 }
 
 /**
- * Query GitHub Commit API for the latest commit SHA
+ * Query GitHub Commit API with ETag support to prevent rate-limit usage
  */
-async function fetchLatestCommitSha(commitApiUrl) {
+async function fetchLatestCommitSha(commitApiUrl, lastCommitETag = null) {
   try {
-    const res = await fetch(commitApiUrl, { cache: 'no-cache' });
+    const headers = { 'Cache-Control': 'no-cache' };
+    if (lastCommitETag) {
+      headers['If-None-Match'] = lastCommitETag;
+    }
+
+    const res = await fetch(commitApiUrl, { headers });
+
+    if (res.status === 304) {
+      return { unmodified: true, sha: null, etag: lastCommitETag };
+    }
+
     if (res.ok) {
+      const etag = res.headers.get('etag');
       const data = await res.json();
       if (data && data[0] && data[0].sha) {
-        return data[0].sha;
+        return { unmodified: false, sha: data[0].sha, etag: etag || null };
       }
     }
   } catch (err) {
     console.warn('Unable to query GitHub Commit API:', err);
   }
-  return null;
+  return { unmodified: false, sha: null, etag: null };
 }
 
 /**
@@ -79,16 +91,34 @@ async function executeSync(options = { isManual: false }) {
   });
 
   try {
-    const localState = await api.storage.local.get(['lastETag', 'lastCommitSha', 'lastBookmarkCount']);
+    const localState = await api.storage.local.get([
+      'lastETag',
+      'lastCommitSha',
+      'lastCommitETag',
+      'lastBookmarkCount'
+    ]);
 
-    // 1. Automatic Commit SHA Verification
-    const latestSha = await fetchLatestCommitSha(targets.commitApiUrl);
+    // 1. Automatic ETag & Commit SHA Verification
+    const commitCheck = await fetchLatestCommitSha(targets.commitApiUrl, localState.lastCommitETag);
+
+    if (!options.isManual && commitCheck.unmodified) {
+      const nowIso = new Date().toISOString();
+      await api.storage.local.set({
+        lastSyncStatus: 'success',
+        lastSyncTime: nowIso,
+        lastSyncMessage: `Up to date (304 Not Modified - 0 API credits used)`
+      });
+      return { success: true, count: localState.lastBookmarkCount || 0, modified: false };
+    }
+
+    const latestSha = commitCheck.sha;
 
     if (!options.isManual && latestSha && localState.lastCommitSha && latestSha === localState.lastCommitSha) {
       const nowIso = new Date().toISOString();
       await api.storage.local.set({
         lastSyncStatus: 'success',
         lastSyncTime: nowIso,
+        lastCommitETag: commitCheck.etag || localState.lastCommitETag,
         lastSyncMessage: `Up to date with GitHub commit ${latestSha.substring(0, 7)}`
       });
       return { success: true, count: localState.lastBookmarkCount || 0, modified: false };
@@ -142,6 +172,7 @@ async function executeSync(options = { isManual: false }) {
       lastSyncMessage: `Synced ${syncResult.count} bookmarks (Commit ${latestSha ? latestSha.substring(0, 7) : 'latest'})`,
       lastBookmarkCount: syncResult.count,
       lastETag: newETag || null,
+      lastCommitETag: commitCheck.etag || localState.lastCommitETag || null,
       lastCommitSha: latestSha || null,
       lastSourceUrl: targets.rawUrl
     });
@@ -180,7 +211,7 @@ function showNotification(title, message, isError = false) {
   if (api.notifications) {
     api.notifications.create({
       type: 'basic',
-      iconUrl: api.runtime.getURL('assets/icons/icon-48.png'),
+      iconUrl: api.runtime.getURL('src/assets/icons/icon-48.png'),
       title: title,
       message: message,
       priority: isError ? 2 : 1
@@ -199,12 +230,36 @@ async function updateAlarmSchedule() {
   console.log(`Configured background commit check every ${CHECK_INTERVAL_MINUTES} minutes.`);
 }
 
+/**
+ * Setup Right-Click Extension Context Menu
+ */
+function setupContextMenu() {
+  if (api.contextMenus && api.contextMenus.create) {
+    api.contextMenus.removeAll(() => {
+      api.contextMenus.create({
+        id: CONTEXT_MENU_SYNC_ID,
+        title: 'Sync FMHY Bookmarks Now',
+        contexts: ['action']
+      });
+    });
+  }
+}
+
 // Event Listeners
+
+if (api.contextMenus && api.contextMenus.onClicked) {
+  api.contextMenus.onClicked.addListener((info) => {
+    if (info.menuItemId === CONTEXT_MENU_SYNC_ID) {
+      executeSync({ isManual: true });
+    }
+  });
+}
 
 // 1. Browser Startup: Automatically check for GitHub commits on browser open!
 if (api.runtime.onStartup) {
   api.runtime.onStartup.addListener(() => {
     console.log('Browser opened: Triggering automated GitHub commit check...');
+    setupContextMenu();
     executeSync({ isManual: false });
   });
 }
@@ -219,6 +274,7 @@ api.alarms.onAlarm.addListener((alarm) => {
 
 // 3. Installation & Updates
 api.runtime.onInstalled.addListener(async (details) => {
+  setupContextMenu();
   if (details.reason === 'install') {
     await api.storage.sync.set(DEFAULT_SETTINGS);
     await updateAlarmSchedule();
@@ -237,7 +293,7 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateAlarmSchedule().then(() => sendResponse({ success: true }));
     return true;
   } else if (message.action === 'CLEAR_CACHE') {
-    api.storage.local.set({ lastETag: null, lastCommitSha: null }).then(() => sendResponse({ success: true }));
+    api.storage.local.set({ lastETag: null, lastCommitSha: null, lastCommitETag: null }).then(() => sendResponse({ success: true }));
     return true;
   }
 });
