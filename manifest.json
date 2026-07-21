@@ -22,7 +22,8 @@
     "open_in_tab": true
   },
   "background": {
-    "service_worker": "background/service_worker.js"
+    "service_worker": "background/service_worker.js",
+    "type": "module"
   },
   "permissions": [
     "bookmarks",
