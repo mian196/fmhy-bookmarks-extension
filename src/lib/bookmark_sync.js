@@ -67,24 +67,52 @@ async function buildBookmarkSubtree(parentId, childrenNodes) {
   let count = 0;
   if (!childrenNodes || childrenNodes.length === 0) return count;
 
+  const folders = [];
+  const links = [];
+
   for (const node of childrenNodes) {
     if (node.isFolder) {
-      const createdFolder = await api.bookmarks.create({
-        parentId: parentId,
-        title: node.title
-      });
-      if (node.children && node.children.length > 0) {
-        count += await buildBookmarkSubtree(createdFolder.id, node.children);
-      }
+      folders.push(node);
     } else if (node.url) {
-      await api.bookmarks.create({
-        parentId: parentId,
-        title: node.title || node.url,
-        url: node.url
-      });
-      count++;
+      links.push(node);
     }
   }
+
+  // 1. Create sibling link bookmarks in parallel batches for maximum speed
+  if (links.length > 0) {
+    const BATCH_SIZE = 25;
+    for (let i = 0; i < links.length; i += BATCH_SIZE) {
+      const batch = links.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map((node) =>
+          api.bookmarks.create({
+            parentId: parentId,
+            title: node.title || node.url,
+            url: node.url
+          }).catch((err) => {
+            console.warn(`Failed to create bookmark: ${node.title}`, err);
+          })
+        )
+      );
+    }
+    count += links.length;
+  }
+
+  // 2. Create subfolder nodes and recurse for their children
+  for (const folderNode of folders) {
+    try {
+      const createdFolder = await api.bookmarks.create({
+        parentId: parentId,
+        title: folderNode.title
+      });
+      if (folderNode.children && folderNode.children.length > 0) {
+        count += await buildBookmarkSubtree(createdFolder.id, folderNode.children);
+      }
+    } catch (err) {
+      console.warn(`Failed to create folder: ${folderNode.title}`, err);
+    }
+  }
+
   return count;
 }
 
