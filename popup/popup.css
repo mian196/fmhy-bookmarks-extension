@@ -1,0 +1,322 @@
+:root, [data-theme="light"] {
+  --canvas-bg: #f5f5f7;
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --text-ink: #1d1d1f;
+  --text-muted: #86868b;
+  --action-blue: #0066cc;
+  --action-blue-hover: #0071e3;
+  --accent-badge-bg: #e8f2ff;
+  --chip-bg: #e8e8ed;
+  --banner-bg: #f5f5f7;
+  --btn-circle-bg: rgba(0, 0, 0, 0.05);
+  --btn-circle-hover: rgba(0, 0, 0, 0.1);
+  --success-green: #34c759;
+  --success-bg: rgba(52, 199, 89, 0.12);
+  --error-red: #ff3b30;
+  --error-bg: rgba(255, 59, 48, 0.12);
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, 'Inter', sans-serif;
+}
+
+[data-theme="dark"] {
+  --canvas-bg: #000000;
+  --card-bg: #1c1c1e;
+  --card-border: #2c2c2e;
+  --text-ink: #f5f5f7;
+  --text-muted: #86868b;
+  --action-blue: #0066cc;
+  --action-blue-hover: #2997ff;
+  --accent-badge-bg: rgba(0, 102, 204, 0.2);
+  --chip-bg: #2c2c2e;
+  --banner-bg: #2c2c2e;
+  --btn-circle-bg: rgba(255, 255, 255, 0.1);
+  --btn-circle-hover: rgba(255, 255, 255, 0.18);
+  --success-green: #30d158;
+  --success-bg: rgba(48, 209, 88, 0.15);
+  --error-red: #ff453a;
+  --error-bg: rgba(255, 69, 58, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 340px;
+  background-color: var(--canvas-bg);
+  color: var(--text-ink);
+  font-family: var(--font-apple);
+  font-size: 14px;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.apple-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.title-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
+  color: var(--text-ink);
+}
+
+.version-tag {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.circular-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  background: var(--btn-circle-bg);
+  border: none;
+  color: var(--text-ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.circular-btn:hover {
+  background: var(--btn-circle-hover);
+}
+
+.circular-btn:active {
+  transform: scale(0.94);
+}
+
+.theme-icon.hidden {
+  display: none;
+}
+
+/* Apple Card (store-utility-card style) */
+.apple-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px; /* {rounded.lg} */
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.card-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px; /* {rounded.pill} */
+  background: var(--chip-bg);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-ink);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--text-muted);
+}
+
+.status-chip.success {
+  background: var(--success-bg);
+  color: var(--success-green);
+}
+.status-chip.success .status-dot {
+  background-color: var(--success-green);
+}
+
+.status-chip.syncing {
+  background: var(--accent-badge-bg);
+  color: var(--action-blue);
+}
+.status-chip.syncing .status-dot {
+  background-color: var(--action-blue);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+.status-chip.error {
+  background: var(--error-bg);
+  color: var(--error-red);
+}
+.status-chip.error .status-dot {
+  background-color: var(--error-red);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.preset-chip {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--chip-bg);
+  padding: 4px 10px;
+  border-radius: 9999px;
+}
+
+/* Metrics */
+.metrics-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 0;
+}
+
+.metric-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metric-number {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.374px;
+  color: var(--text-ink);
+}
+
+.metric-caption {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: -0.12px;
+}
+
+.metric-divider {
+  width: 1px;
+  height: 28px;
+  background-color: var(--card-border);
+}
+
+.info-banner {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--banner-bg);
+  padding: 10px 12px;
+  border-radius: 11px; /* {rounded.md} */
+  border: 1px solid var(--card-border);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Button Primary Pill ({button-primary}) */
+.btn-primary-pill {
+  background-color: var(--action-blue);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px; /* {rounded.pill} */
+  padding: 11px 22px;
+  font-family: var(--font-apple);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.374px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.btn-primary-pill:hover {
+  background-color: var(--action-blue-hover);
+}
+
+.btn-primary-pill:active {
+  transform: scale(0.97); /* Apple signature button press scaling */
+}
+
+.btn-primary-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--action-blue);
+}
+
+.footer-separator {
+  opacity: 0.4;
+}

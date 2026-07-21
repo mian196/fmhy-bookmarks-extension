@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FMHY Auto-Sync Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="page-container">
+    <!-- Header -->
+    <header class="page-header">
+      <div class="brand">
+        <img src="../assets/logo.svg" width="52" height="52" alt="FMHY Logo" class="brand-icon">
+        <div>
+          <h1>FMHY Auto-Sync Preferences</h1>
+          <p class="subtitle">Configure bookmark directory, source repository, and desktop notifications.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Section 1: Bookmark Preset -->
+      <section class="card">
+        <div class="card-header">
+          <h2>1. Bookmark Collection</h2>
+          <p>Select which FMHY bookmark set to keep synchronized on your browser Bookmarks Bar.</p>
+        </div>
+        <div class="card-body">
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="preset" value="full" checked>
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Full FMHY Directory</span>
+                  <span class="badge badge-cyan">Recommended</span>
+                </div>
+                <span class="radio-desc">Complete index containing all categories and ~3,000+ curated bookmarks.</span>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="preset" value="starred">
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Starred-Only Collection</span>
+                  <span class="badge badge-amber">Top Recommended</span>
+                </div>
+                <span class="radio-desc">Curated collection featuring top-rated ⭐ and 🌟 recommended community links.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Repository Target Strategy -->
+      <section class="card">
+        <div class="card-header">
+          <h2>2. Sync Source Repository</h2>
+          <p>The extension monitors GitHub on startup and syncs whenever a new commit is detected.</p>
+        </div>
+
+        <div class="card-body">
+          <div class="strategy-selector">
+            <!-- Strategy 1: Official Repo -->
+            <label class="strategy-card">
+              <input type="radio" name="strategy" value="official" checked>
+              <div class="strategy-content">
+                <div class="strategy-header">
+                  <img src="https://raw.githubusercontent.com/fmhy/edit/main/docs/public/pwa_icon.png" width="22" height="22" alt="Official FMHY Icon" class="strategy-img">
+                  <div>
+                    <span class="strategy-title">Official FMHY Repository</span>
+                    <span class="badge badge-emerald">Official (fmhy/bookmarks)</span>
+                  </div>
+                </div>
+                <p class="strategy-desc">Tracks the official FMHY repository. Automatically syncs whenever a new commit is published on GitHub.</p>
+              </div>
+            </label>
+
+            <!-- Strategy 2: Custom Fork -->
+            <label class="strategy-card">
+              <input type="radio" name="strategy" value="custom_fork">
+              <div class="strategy-content">
+                <div class="strategy-header">
+                  <div class="strategy-icon icon-fork">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="6" y1="3" x2="6" y2="15"></line>
+                      <circle cx="18" cy="6" r="3"></circle>
+                      <circle cx="6" cy="18" r="3"></circle>
+                      <path d="M18 9a9 9 0 0 1-9 9"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <span class="strategy-title">Custom Fork Repository</span>
+                    <span class="badge badge-purple">Personal Fork</span>
+                  </div>
+                </div>
+                <p class="strategy-desc">Track your personal GitHub fork. Automatically syncs when new workflow commits land on your repo.</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Custom Fork Panel -->
+          <div id="panel-custom-fork" class="subpanel hidden">
+            <h3 class="subpanel-title">Custom Repository Parameters</h3>
+            <div class="form-group">
+              <label for="fork-repo">GitHub Repository (owner/repo)</label>
+              <input type="text" id="fork-repo" placeholder="yourusername/fmhy-bookmarks">
+            </div>
+            <div class="form-group margin-top">
+              <label for="custom-file-path">Custom Bookmark File Path (Optional)</label>
+              <input type="text" id="custom-file-path" placeholder="fmhy_in_bookmarks.html">
+              <span class="form-hint">Leave blank to use default preset filename.</span>
+            </div>
+          </div>
+
+          <!-- Live Status Box -->
+          <div class="preview-box">
+            <div class="preview-header">
+              <span class="preview-title">Automated Commit Tracking</span>
+              <span class="preview-badge" id="preview-mode-badge">Official FMHY</span>
+            </div>
+            <div class="preview-grid">
+              <div class="preview-item">
+                <span class="preview-label">Monitored Repository</span>
+                <span class="preview-val" id="preview-target-repo">fmhy/bookmarks</span>
+              </div>
+              <div class="preview-item">
+                <span class="preview-label">Latest GitHub Commit</span>
+                <span class="preview-val" id="preview-commit-sha">Checking...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="notify-sync">
+              <span>Show desktop notification when background sync updates bookmarks</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toast bar -->
+      <div id="toast" class="toast hidden">
+        Settings saved successfully!
+      </div>
+
+      <!-- Action Footer -->
+      <div class="action-footer">
+        <button id="btn-save" class="btn-primary-pill">Save Preferences</button>
+        <button id="btn-reset" class="btn-secondary-pill">Reset Defaults</button>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>
