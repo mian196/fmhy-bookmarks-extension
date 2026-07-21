@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Standardized `contextMenus` permission across Chromium and Firefox builds.
 - Refactored `service_worker.js` background listeners to manage context menu interactions and storage timestamp updates.
+- Replaced remote GitHub raw icon URL in options page with bundled local `src/assets/icons/fmhy.png` asset.
 
 ---
 
