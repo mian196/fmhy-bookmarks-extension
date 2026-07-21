@@ -19,20 +19,16 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Create Extension Package ZIPs
+      - name: Create Universal Extension Package ZIP
         run: |
           mkdir -p dist
-          zip -r "dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
-          zip -r "dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
-          zip -r "dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
+          zip -r "dist/fmhy-bookmarks-extension-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
 
-      - name: Create GitHub Release & Upload Assets
+      - name: Create GitHub Release & Upload Asset
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip
-            dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip
-            dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip
+            dist/fmhy-bookmarks-extension-${{ env.VERSION }}.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
