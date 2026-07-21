@@ -22,7 +22,13 @@
     "open_in_tab": true
   },
   "background": {
-    "service_worker": "background/service_worker.js"
+    "service_worker": "background/service_worker.js",
+    "scripts": [
+      "lib/webextension-polyfill.js",
+      "lib/html_parser.js",
+      "lib/bookmark_sync.js",
+      "background/service_worker.js"
+    ]
   },
   "permissions": [
     "bookmarks",
@@ -33,5 +39,11 @@
   "host_permissions": [
     "https://api.github.com/*",
     "https://raw.githubusercontent.com/*"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fmhy-bookmarks-sync@mian196",
+      "strict_min_version": "109.0"
+    }
+  }
 }
