@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.svg" width="100" height="100" alt="FMHY Bookmarks Auto-Sync Logo">
+<img src="./src/assets/logo.svg" width="100" height="100" alt="FMHY Bookmarks Auto-Sync Logo">
 
 # FMHY Bookmarks Auto-Sync
 
