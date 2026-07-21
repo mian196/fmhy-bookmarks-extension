@@ -22,7 +22,6 @@
     "open_in_tab": true
   },
   "background": {
-    "service_worker": "background/service_worker.js",
     "scripts": [
       "lib/webextension-polyfill.js",
       "lib/html_parser.js",
