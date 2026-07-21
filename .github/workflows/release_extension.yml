@@ -31,8 +31,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip
-            dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip
+            dist/fmhy-bookmarks-extension-${{ env.VERSION }}.chromium.zip
+            dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
