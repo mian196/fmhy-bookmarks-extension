@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "FMHY Bookmarks Auto-Sync",
+  "version": "1.2.0",
+  "description": "Automated browser extension that keeps FreeMediaHeckYeah (FMHY) curated bookmarks synchronized on your Bookmarks Bar.",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "FMHY Bookmarks Auto-Sync",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "alarms",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://api.github.com/*",
+    "https://raw.githubusercontent.com/*"
+  ]
+}
