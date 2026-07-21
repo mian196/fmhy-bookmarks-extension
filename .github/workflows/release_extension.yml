@@ -15,20 +15,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - name: Extract Tag Version
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Create Universal Extension Package ZIP
-        run: |
-          mkdir -p dist
-          zip -r "dist/fmhy-bookmarks-extension-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
+      - name: Build Extension Packages for Chromium and Firefox
+        run: python tools/build.py "${{ env.VERSION }}"
 
-      - name: Create GitHub Release & Upload Asset
+      - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/fmhy-bookmarks-extension-${{ env.VERSION }}.zip
+            dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip
+            dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
