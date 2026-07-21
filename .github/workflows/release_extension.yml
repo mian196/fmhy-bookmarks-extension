@@ -1,0 +1,38 @@
+name: Package & Release Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Tag Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Create Extension Package ZIPs
+        run: |
+          mkdir -p dist
+          zip -r "dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
+          zip -r "dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
+          zip -r "dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
+
+      - name: Create GitHub Release & Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip
+            dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip
+            dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

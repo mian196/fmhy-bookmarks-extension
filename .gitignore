@@ -13,3 +13,4 @@ Desktop.ini
 # Temporary & Log Files
 *.tmp
 *.log
+dist/
