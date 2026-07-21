@@ -29,11 +29,17 @@ jobs:
       - name: Validate JSON Syntax for Firefox Manifest
         run: python -c "import json; json.load(open('platform/firefox/manifest.json'))"
 
+      - name: Extract Manifest Version Dynamically
+        id: get_version
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('platform/chromium/manifest.json'))['version'])")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Test Multi-Platform Build Script
-        run: python tools/build.py 1.4.0
+        run: python tools/build.py "${{ env.VERSION }}"
 
       - name: Verify Generated ZIP Archives
         run: |
-          test -f dist/fmhy-bookmarks-extension-v1.4.0.chromium.zip
-          test -f dist/fmhy-bookmarks-extension-v1.4.0.firefox.zip
-          echo "All builds and manifests validated successfully!"
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip"
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip"
+          echo "All builds and manifests for v${{ env.VERSION }} validated successfully!"
