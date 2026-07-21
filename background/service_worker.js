@@ -5,7 +5,9 @@
  * HTML parsing, bookmark replacement, storage state, and notifications.
  */
 
-importScripts('../lib/webextension-polyfill.js', '../lib/html_parser.js', '../lib/bookmark_sync.js');
+if (typeof importScripts === 'function') {
+  importScripts('../lib/webextension-polyfill.js', '../lib/html_parser.js', '../lib/bookmark_sync.js');
+}
 
 const ALARM_NAME = 'fmhy_auto_sync_alarm';
 const CHECK_INTERVAL_MINUTES = 360; // 6 Hours periodic fallback check
