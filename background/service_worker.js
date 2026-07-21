@@ -67,7 +67,7 @@ async function fetchLatestCommitSha(commitApiUrl) {
  * Main Sync Workflow Execution
  * @param {Object} options - { isManual: boolean }
  */
-export async function executeSync(options = { isManual: false }) {
+async function executeSync(options = { isManual: false }) {
   const settings = await api.storage.sync.get(DEFAULT_SETTINGS);
   const targets = await resolveTargetPaths();
 
@@ -189,7 +189,7 @@ function showNotification(title, message, isError = false) {
 /**
  * Configure periodic background alarm
  */
-export async function updateAlarmSchedule() {
+async function updateAlarmSchedule() {
   await api.alarms.clear(ALARM_NAME);
   api.alarms.create(ALARM_NAME, {
     periodInMinutes: CHECK_INTERVAL_MINUTES

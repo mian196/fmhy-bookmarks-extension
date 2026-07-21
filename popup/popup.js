@@ -2,7 +2,7 @@
  * Apple Design System - Popup Dashboard Controller
  */
 
-import { api } from '../lib/webextension-polyfill.js';
+
 
 const statusBadge = document.getElementById('status-badge');
 const statusText = document.getElementById('status-text');

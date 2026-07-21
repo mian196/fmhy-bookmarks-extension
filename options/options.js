@@ -4,7 +4,7 @@
  * automatic GitHub commit SHA tracking, theme syncing, and settings persistence.
  */
 
-import { api } from '../lib/webextension-polyfill.js';
+
 
 const presetRadios = document.getElementsByName('preset');
 const strategyRadios = document.getElementsByName('strategy');
