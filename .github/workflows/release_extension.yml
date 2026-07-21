@@ -22,9 +22,9 @@ jobs:
       - name: Create Extension Package ZIPs
         run: |
           mkdir -p dist
-          zip -r "dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
-          zip -r "dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
-          zip -r "dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/ LICENSE README.md
+          zip -r "dist/fmhy-bookmarks-extension-chrome-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
+          zip -r "dist/fmhy-bookmarks-extension-edge-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
+          zip -r "dist/fmhy-bookmarks-extension-firefox-${{ env.VERSION }}.zip" manifest.json background/ lib/ options/ popup/ assets/
 
       - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
