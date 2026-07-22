@@ -4,7 +4,7 @@
 
 # FMHY Bookmarks Auto-Sync
 
-**Automated browser extension (Manifest V3) that keeps 3,000+ FreeMediaHeckYeah (FMHY) curated digital media bookmarks synchronized on your browser's Bookmarks Bar.**
+**Automated browser extension (Manifest V3) that keeps 25,000+ FreeMediaHeckYeah (FMHY) curated digital media bookmarks synchronized on your browser's Bookmarks Bar.**
 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-6366f1.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0066cc.svg)](LICENSE)

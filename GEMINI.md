@@ -28,7 +28,7 @@ This document outlines the coding standards, workflow conventions, architectural
 ## ⚡ 3. Performance & API Optimization Strategies
 
 ### A. Firefox Bookmark Sync Performance (Batching Strategy)
-* **Problem**: Firefox stores bookmarks in an underlying SQLite database (`places.sqlite`). Sequential bookmark insertions via `browser.bookmarks.create` can take 45+ seconds for ~3,000 links.
+* **Problem**: Firefox stores bookmarks in an underlying SQLite database (`places.sqlite`). Sequential bookmark insertions via `browser.bookmarks.create` can take 45+ seconds for ~25,000 links.
 * **Solution**: Use parallel batching (`Promise.all` in chunks of 25 promises) in `src/lib/bookmark_sync.js`. This speeds up Firefox bookmark tree creation by ~20x (reducing sync duration to 1–2 seconds).
 
 ### B. GitHub ETag Rate-Limit Protection
