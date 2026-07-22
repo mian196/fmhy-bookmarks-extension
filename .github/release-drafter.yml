@@ -1,0 +1,31 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: '🚀 Features & Enhancements'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes & Patches'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '⚡ Performance Optimizations'
+    labels:
+      - 'performance'
+      - 'perf'
+  - title: '📄 Documentation & Chore'
+    labels:
+      - 'documentation'
+      - 'chore'
+      - 'dependencies'
+
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: '\*\_`~'
+template: |
+  ## 🌟 Release Highlights
+
+  $CHANGES
+
+  ---
+
+  **Full Changelog**: https://github.com/$OWNER/$REPO/compare/$PREVIOUS_TAG...$NEXT_TAG

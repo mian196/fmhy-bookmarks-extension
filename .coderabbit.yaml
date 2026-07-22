@@ -1,0 +1,19 @@
+# CodeRabbit AI Configuration for Automated PR Summaries & Code Reviews
+version: "2"
+language: "en-US"
+tone_instructions: "Focus on browser extension performance, Manifest V3 compliance, and cross-browser safety (Chrome & Firefox)."
+
+reviews:
+  profile: "chill"
+  auto_review:
+    enabled: true
+    drafts: false
+  request_changes_workflow: false
+
+summaries:
+  enabled: true
+  high_level_summary: true
+  poem: false
+
+chat:
+  auto_reply: true
