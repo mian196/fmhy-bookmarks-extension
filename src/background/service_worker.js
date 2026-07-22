@@ -177,12 +177,10 @@ async function executeSync(options = { isManual: false }) {
       lastSourceUrl: targets.rawUrl
     });
 
-    if (settings.notifyOnSync || options.isManual) {
-      showNotification(
-        'FMHY Bookmarks Synced',
-        `Updated ${syncResult.count} bookmarks on your Bookmarks Bar.`
-      );
-    }
+    showNotification(
+      'FMHY Bookmarks Synced',
+      `Updated ${syncResult.count} bookmarks on your Bookmarks Bar.`
+    );
 
     return { success: true, count: syncResult.count, modified: true };
   } catch (error) {
@@ -205,9 +203,14 @@ async function executeSync(options = { isManual: false }) {
 }
 
 /**
- * Show system desktop notification
+ * Show system desktop notification (strictly honors notifyOnSync user setting)
  */
-function showNotification(title, message, isError = false) {
+async function showNotification(title, message, isError = false) {
+  const settings = await api.storage.sync.get(DEFAULT_SETTINGS);
+  if (!settings.notifyOnSync) {
+    return; // User disabled notifications in options
+  }
+
   if (api.notifications && api.notifications.create) {
     try {
       const res = api.notifications.create({
