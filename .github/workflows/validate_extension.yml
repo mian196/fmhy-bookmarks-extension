@@ -1,0 +1,45 @@
+name: Validate Extension Build & Manifests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Validate JSON Syntax for Chromium Manifest
+        run: python -c "import json; json.load(open('platform/chromium/manifest.json'))"
+
+      - name: Validate JSON Syntax for Firefox Manifest
+        run: python -c "import json; json.load(open('platform/firefox/manifest.json'))"
+
+      - name: Extract Manifest Version Dynamically
+        id: get_version
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('platform/chromium/manifest.json'))['version'])")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Test Multi-Platform Build Script
+        run: python tools/build.py "${{ env.VERSION }}"
+
+      - name: Verify Generated ZIP Archives
+        run: |
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip"
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip"
+          echo "All builds and manifests for v${{ env.VERSION }} validated successfully!"
