@@ -6,14 +6,14 @@ This document outlines the coding standards, workflow conventions, architectural
 
 ## 🌿 1. Branching Strategy & Git Workflow
 
-* **Development Branch**: Always perform code changes, features, and bug fixes on the `dev` branch. Never commit directly to `main`.
+* **Main Branch Direct Workflow**: All development, features, and bug fixes occur directly on the `main` branch. No separate `dev` branch is used.
 * **Release Process**:
-  1. Complete feature/bug fix on `dev`.
-  2. Update `CHANGELOG.md` with release notes under the active version target.
-  3. Rebuild extension ZIP packages using `python tools/build.py`.
-  4. Merge `dev` into `main`.
-  5. Create an annotated git tag (e.g., `git tag -a v1.4.0 -m "Release v1.4.0"`).
-  6. Push tag to GitHub (`git push origin v1.4.0`) to trigger automated release workflows.
+  1. Commit code changes, features, and bug fixes directly to `main`.
+  2. Update `CHANGELOG.md` with release entries.
+  3. When sufficient commits accumulate for a new version release, update version numbers in manifests (`platform/*/manifest.json`).
+  4. Rebuild extension ZIP packages using `python tools/build.py`.
+  5. Create an annotated git tag (e.g., `git tag -a v1.5.0 -m "Release v1.5.0"`).
+  6. Push tag to GitHub (`git push origin v1.5.0`) to trigger automated release workflows and Gemini AI Release Notes generation.
 
 ---
 
