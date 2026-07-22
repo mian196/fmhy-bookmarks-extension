@@ -3,6 +3,7 @@
  * Implements 2-Strategy Target Management (Official FMHY vs Personal Fork),
  * ETag HTTP caching for rate-limit protection, context menu actions,
  * automatic GitHub Commit SHA validation, HTML parsing, and bookmark replacement.
+ * CodeRabbit AI Verification Test.
  */
 
 if (typeof importScripts === 'function') {
