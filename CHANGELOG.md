@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🕒 **Popup "Last Synced" Relative Timestamp**: Displays a live, formatted relative timestamp (e.g. *"Synced 2 mins ago"*, *"Just now"*) in the extension popup dashboard.
 - 🖱️ **Right-Click Action Context Menu**: Added a `"Sync FMHY Bookmarks Now"` option when right-clicking the extension toolbar icon.
 - ⚙️ **Automated CI/CD Validation Workflow**: Created `.github/workflows/validate_extension.yml` to lint manifests and verify multi-platform build scripts on pull requests and branch pushes.
+- 📄 **Developer Guidelines Documentation**: Created `GEMINI.md` summarizing development guidelines, performance strategies, build architecture, and release procedures.
 
 ### Changed
 - Standardized `contextMenus` permission across Chromium and Firefox builds.
