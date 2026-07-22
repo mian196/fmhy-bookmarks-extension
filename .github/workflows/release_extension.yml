@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,12 +29,18 @@ jobs:
       - name: Build Extension Packages for Chromium and Firefox
         run: python tools/build.py "${{ env.VERSION }}"
 
+      - name: Generate Gemini AI Release Notes
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python .github/scripts/gemini_release_notes.py
+
       - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
         with:
+          body_path: ${{ hashFiles('gemini_release_notes.md') != '' && 'gemini_release_notes.md' || '' }}
+          generate_release_notes: ${{ hashFiles('gemini_release_notes.md') == '' }}
           files: |
             dist/fmhy-bookmarks-extension-${{ env.VERSION }}.chromium.zip
             dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
-          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

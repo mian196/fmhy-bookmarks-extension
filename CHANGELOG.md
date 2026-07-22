@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ⚙️ **Automated CI/CD Validation Workflow**: Created `.github/workflows/validate_extension.yml` to lint manifests and verify multi-platform build scripts on pull requests and branch pushes.
 - 📄 **Developer Guidelines Documentation**: Created `GEMINI.md` summarizing development guidelines, performance strategies, build architecture, and release procedures.
 - 🤖 **AI Code Review & Release Drafter Automation**: Added `.coderabbit.yaml`, `.github/release-drafter.yml`, `.github/pull_request_template.md`, and `.github/workflows/draft_release.yml` for automated AI PR summaries, reviews, and categorized release drafting.
-- ♊ **Google Gemini AI PR Summarizer Workflow**: Added `.github/scripts/gemini_ai.py` and `.github/workflows/gemini_pr_summary.yml` to automatically generate AI release notes and PR summaries using the free Google Gemini Flash API.
+- ♊ **Google Gemini AI Release Notes Generator**: Added `.github/scripts/gemini_release_notes.py` and updated `.github/workflows/release_extension.yml` to automatically generate AI release notes using the free Google Gemini Flash API.
 
 ### Changed
 - Standardized `contextMenus` permission across Chromium and Firefox builds.
