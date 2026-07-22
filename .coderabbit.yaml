@@ -1,9 +1,12 @@
-# CodeRabbit AI Configuration for Automated PR Summaries & Code Reviews
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "en-US"
 tone_instructions: "Focus on browser extension performance, Manifest V3 compliance, and cross-browser safety (Chrome & Firefox)."
 
 reviews:
   profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_instructions: "Create concise release notes as a bullet-point list."
   auto_review:
     enabled: true
     drafts: false
