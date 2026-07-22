@@ -208,14 +208,21 @@ async function executeSync(options = { isManual: false }) {
  * Show system desktop notification
  */
 function showNotification(title, message, isError = false) {
-  if (api.notifications) {
-    api.notifications.create({
-      type: 'basic',
-      iconUrl: api.runtime.getURL('src/assets/icons/icon-48.png'),
-      title: title,
-      message: message,
-      priority: isError ? 2 : 1
-    });
+  if (api.notifications && api.notifications.create) {
+    try {
+      const res = api.notifications.create({
+        type: 'basic',
+        iconUrl: api.runtime.getURL('assets/icons/icon-48.png'),
+        title: title,
+        message: message,
+        priority: isError ? 2 : 1
+      });
+      if (res && typeof res.catch === 'function') {
+        res.catch((err) => console.warn('Failed to display desktop notification:', err));
+      }
+    } catch (err) {
+      console.warn('Notification execution error:', err);
+    }
   }
 }
 

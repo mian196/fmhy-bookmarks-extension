@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Updated Firefox `strict_min_version` to `142.0` in `platform/firefox/manifest.json` to resolve Mozilla AMO validator warning regarding `data_collection_permissions` support on Firefox for Android.
+- Fixed Chrome desktop notification image loading error (`Unable to download all specified images`) in `service_worker.js` by correcting `iconUrl` path to `assets/icons/icon-48.png` and wrapping notification calls in Promise rejection handling.
 
 ---
 
