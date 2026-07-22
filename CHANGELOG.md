@@ -22,7 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized `contextMenus` permission across Chromium and Firefox builds.
 - Refactored `service_worker.js` background listeners to manage context menu interactions and storage timestamp updates.
 - Replaced remote GitHub raw icon URL in options page with bundled local `src/assets/icons/fmhy.png` asset.
-- Updated preset descriptions in options page and README documentation to accurately reflect ~25,000+ total links and clarified Starred-Only collection as containing starred ⭐ sites from the FMHY wiki.
+- Updated preset labels and descriptions in options page and README documentation to accurately reflect ~25,000+ total links (`Full Collection`) and clarified Starred-Only collection (`Starred Only`).
 
 ### Fixed
 - Updated Firefox `strict_min_version` to `142.0` in `platform/firefox/manifest.json` to resolve Mozilla AMO validator warning regarding `data_collection_permissions` support on Firefox for Android.
