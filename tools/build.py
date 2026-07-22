@@ -53,6 +53,12 @@ def main():
 
     # Package Chromium ZIP
     chrome_zip = os.path.join(dist_dir, f'fmhy-bookmarks-extension-v{version}.chromium.zip')
+    if os.path.exists(chrome_zip):
+        try:
+            os.remove(chrome_zip)
+        except OSError:
+            pass
+
     with zipfile.ZipFile(chrome_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(chrome_build):
             for file in files:
@@ -62,6 +68,12 @@ def main():
 
     # Package Firefox ZIP
     firefox_zip = os.path.join(dist_dir, f'fmhy-bookmarks-extension-v{version}.firefox.zip')
+    if os.path.exists(firefox_zip):
+        try:
+            os.remove(firefox_zip)
+        except OSError:
+            pass
+
     with zipfile.ZipFile(firefox_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(firefox_build):
             for file in files:
