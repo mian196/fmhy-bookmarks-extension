@@ -9,17 +9,19 @@ This document outlines the coding standards, workflow conventions, architectural
 * **Main Branch Direct Workflow**: All development, features, and bug fixes occur directly on the `main` branch. No separate `dev` branch is used.
 * **Release Process**:
   1. Commit code changes, features, and bug fixes directly to `main`.
-  2. Update `CHANGELOG.md` with release entries.
-  3. When sufficient commits accumulate for a new version release, update version numbers in manifests (`platform/*/manifest.json`).
-  4. Rebuild extension ZIP packages using `python tools/build.py`.
-  5. Create an annotated git tag (e.g., `git tag -a v1.5.0 -m "Release v1.5.0"`).
-  6. Push tag to GitHub (`git push origin v1.5.0`) to trigger automated release workflows and Gemini AI Release Notes generation.
+  2. Document changes under `## [Unreleased]` or the upcoming target version section in `CHANGELOG.md`. **Never append post-release changes to an already tagged version section.**
+  3. When sufficient commits accumulate for a new release, bump version numbers in manifests (`platform/*/manifest.json`).
+  4. Finalize the new version entry in `CHANGELOG.md` (e.g. `## [v1.5.0] - 2026-07-22`).
+  5. Rebuild extension ZIP packages using `python tools/build.py`.
+  6. Create an annotated git tag (e.g., `git tag -a v1.5.0 -m "Release v1.5.0"`).
+  7. Push tag to GitHub (`git push origin v1.5.0`) to trigger automated release workflows and Gemini AI Release Notes generation.
 
 ---
 
 ## 📝 2. Documentation & Changelog Maintenance
 
 * **Strict Changelog Requirement**: Every feature addition, refactor, or bug fix **must** be documented in `CHANGELOG.md`.
+* **Immutable Release Entries**: Once a version tag (e.g. `v1.4.0`) is created and released, its `CHANGELOG.md` entry is **immutable**. All subsequent commits must be logged under `## [Unreleased]` or the next version release header (`## [v1.5.0]`).
 * **Format**: Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Sections should include: `### Added`, `### Changed`, `### Fixed`, and `### Performance` as applicable.
 
