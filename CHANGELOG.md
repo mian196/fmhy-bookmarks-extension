@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored `service_worker.js` background listeners to manage context menu interactions and storage timestamp updates.
 - Replaced remote GitHub raw icon URL in options page with bundled local `src/assets/icons/fmhy.png` asset.
 
+### Fixed
+- Updated Firefox `strict_min_version` to `142.0` in `platform/firefox/manifest.json` to resolve Mozilla AMO validator warning regarding `data_collection_permissions` support on Firefox for Android.
+
 ---
 
 ## [v1.3.0] - 2026-07-21
