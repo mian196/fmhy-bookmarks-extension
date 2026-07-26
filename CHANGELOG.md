@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - 🦊 **Mozilla Add-on Store Integration**: Added official Mozilla Add-on Store listing and 1-click store installation support.
+- 🏷️ **Dynamic Popup Version Tag**: Automatically fetches and displays extension version directly from `manifest.json` via `api.runtime.getManifest()`.
+
 
 ---
 
