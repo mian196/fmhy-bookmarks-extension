@@ -39,23 +39,23 @@
 
 ## 🚀 Installation & Usage
 
-### Method 1: Install Pre-Built Packages (Recommended)
-1. Download the latest release package for your browser from [Releases](https://github.com/mian196/fmhy-bookmarks-extension/releases):
-   - **Chrome / Edge / Brave / Opera**: Download `fmhy-bookmarks-extension-v1.3.0.chromium.zip`
-   - **Firefox**: Download `fmhy-bookmarks-extension-v1.3.0.firefox.zip`
-2. Extract the downloaded ZIP folder.
-3. Load in your browser:
-   - **Chrome / Edge / Brave**:
-     1. Open `chrome://extensions/` or `edge://extensions/`.
-     2. Enable **Developer mode** (top-right toggle).
-     3. Click **Load unpacked** and select the extracted folder.
-   - **Firefox**:
-     1. Open `about:debugging#/runtime/this-firefox`.
-     2. Click **Load Temporary Add-on...** and select `manifest.json` from the extracted folder.
+<p align="center">
+  <a href="https://addons.mozilla.org/en-US/firefox/addon/fmhy-bookmarks-auto-sync/"><img src="https://raw.githubusercontent.com/fmhy/FMHY-SafeGuard/main/assets/firefox_addon_image.png" alt="Get FMHY Bookmarks Auto-Sync for Firefox"></a>
+</p>
 
 ---
 
-### Method 2: Development / Build from Source
+### 🌐 Chromium & Forks (Chrome, Edge, Brave, Opera)
+
+1. Download the latest `fmhy-bookmarks-extension-*.chromium.zip` package from [Releases](https://github.com/mian196/fmhy-bookmarks-extension/releases).
+2. Extract the downloaded ZIP folder.
+3. Open `chrome://extensions/` (or `edge://extensions/` / `brave://extensions/`).
+4. Enable **Developer mode** (top-right toggle).
+5. Click **Load unpacked** and select the extracted folder.
+
+---
+
+### 🛠️ Development / Build from Source
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/mian196/fmhy-bookmarks-extension.git
