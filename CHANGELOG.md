@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - 🦊 **Mozilla Add-on Store Integration**: Added official Mozilla Add-on Store link (`https://addons.mozilla.org/en-US/firefox/addon/fmhy-bookmarks-auto-sync/`) and Firefox store banner to `README.md`.
+- ⚙️ **Automated Firefox AMO Deployment**: Added Firefox Add-ons (AMO) auto-publishing step to `.github/workflows/release_extension.yml` using `wopian/firefox-addon-action`.
+
 
 ### Changed
 - Updated `README.md` installation instructions: removed manual Firefox developer installation (`about:debugging`) and zip package instructions for Firefox in favor of 1-click store installation. Chromium browsers continue to use manual release zip installation.

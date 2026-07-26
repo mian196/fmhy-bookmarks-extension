@@ -44,3 +44,13 @@ jobs:
             dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to Firefox Add-ons (AMO)
+        if: ${{ secrets.AMO_API_KEY != '' && secrets.AMO_API_SECRET != '' }}
+        uses: wopian/firefox-addon-action@v1
+        with:
+          guid: 'fmhy-bookmarks-sync@mian196'
+          xpi_path: dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
+          api_key: ${{ secrets.AMO_API_KEY }}
+          api_secret: ${{ secrets.AMO_API_SECRET }}
+
