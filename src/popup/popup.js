@@ -174,10 +174,25 @@ btnClearCache.addEventListener('click', async (e) => {
   await handleSyncClick();
 });
 
+const versionTag = document.getElementById('version-tag');
+
+/**
+ * Dynamically populate version tag from manifest.json
+ */
+function initVersion() {
+  if (versionTag && typeof api !== 'undefined' && api.runtime && api.runtime.getManifest) {
+    const manifest = api.runtime.getManifest();
+    if (manifest && manifest.version) {
+      versionTag.textContent = `v${manifest.version}`;
+    }
+  }
+}
+
 // Periodic auto-refresh
 setInterval(updateUI, 2000);
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initVersion();
   await initTheme();
   await updateUI();
 });
