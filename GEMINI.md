@@ -23,7 +23,8 @@ This document outlines the coding standards, workflow conventions, architectural
 
 ## 📝 2. Documentation & Changelog Maintenance
 
-* **Strict Changelog Requirement**: Every feature addition, refactor, or bug fix **must** be documented in `CHANGELOG.md`.
+* **Main Extension Codebase Changes Only**: Only document changes, features, refactors, and bug fixes that directly impact the extension's core codebase, functionality, UI, or performance (`src/`, `platform/`).
+* **Exclude Internal Chores & Workflows**: **NEVER** include non-codebase chores, README doc fixes, developer guide edits (`GEMINI.md`), or GitHub Actions workflow/CI updates in `CHANGELOG.md`.
 * **Immutable Release Entries**: Once a version tag (e.g. `v1.4.0`) is created and released, its `CHANGELOG.md` entry is **immutable**. All subsequent commits must be logged under `## [Unreleased]` or the next version release header (`## [v1.5.0]`).
 * **Format**: Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 * Sections should include: `### Added`, `### Changed`, `### Fixed`, and `### Performance` as applicable.
