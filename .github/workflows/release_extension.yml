@@ -45,6 +45,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare Release Notes for AMO
+        id: amo_notes
+        run: |
+          if [ -f "gemini_release_notes.md" ]; then
+            notes=$(cat gemini_release_notes.md)
+          else
+            notes="Release ${{ env.VERSION }} of FMHY Bookmarks Auto-Sync extension."
+          fi
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$notes" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Publish to Firefox Add-ons (AMO)
         if: ${{ env.AMO_API_KEY != '' && env.AMO_API_SECRET != '' }}
         env:
@@ -56,4 +68,6 @@ jobs:
           addon-path: dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
           auth-api-issuer: ${{ secrets.AMO_API_KEY }}
           auth-api-secret: ${{ secrets.AMO_API_SECRET }}
+          release-note: ${{ steps.amo_notes.outputs.notes }}
+
 
