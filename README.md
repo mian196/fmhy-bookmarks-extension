@@ -6,6 +6,8 @@
 
 **Automated browser extension (Manifest V3) that keeps 25,000+ FreeMediaHeckYeah (FMHY) curated digital media bookmarks synchronized on your browser's Bookmarks Bar.**
 
+[![GitHub Release](https://img.shields.io/github/v/release/mian196/fmhy-bookmarks-extension?color=10b981&logo=github)](https://github.com/mian196/fmhy-bookmarks-extension/releases)
+[![CI Build Validation](https://img.shields.io/github/actions/workflow/status/mian196/fmhy-bookmarks-extension/validate_extension.yml?branch=main&label=CI%20Validation&logo=githubactions&logoColor=white)](https://github.com/mian196/fmhy-bookmarks-extension/actions)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-6366f1.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-0066cc.svg)](LICENSE)
 [![Vanilla JS](https://img.shields.io/badge/Stack-Vanilla%20JS-f59e0b.svg)](#features)
@@ -67,6 +69,12 @@
    python tools/build.py
    ```
    Built packages will be generated inside the `dist/` directory.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check out our [Contributing Guide](CONTRIBUTING.md) for instructions on local development, browser testing, and submitting pull requests.
 
 ---
 
