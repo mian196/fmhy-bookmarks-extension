@@ -46,11 +46,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to Firefox Add-ons (AMO)
-        if: ${{ secrets.AMO_API_KEY != '' && secrets.AMO_API_SECRET != '' }}
-        uses: wopian/firefox-addon-action@v1
+        if: ${{ env.AMO_API_KEY != '' && env.AMO_API_SECRET != '' }}
+        env:
+          AMO_API_KEY: ${{ secrets.AMO_API_KEY }}
+          AMO_API_SECRET: ${{ secrets.AMO_API_SECRET }}
+        uses: browser-actions/release-firefox-addon@latest
         with:
-          guid: 'fmhy-bookmarks-sync@mian196'
-          xpi_path: dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
-          api_key: ${{ secrets.AMO_API_KEY }}
-          api_secret: ${{ secrets.AMO_API_SECRET }}
+          addon-id: 'fmhy-bookmarks-sync@mian196'
+          addon-path: dist/fmhy-bookmarks-extension-${{ env.VERSION }}.firefox.zip
+          auth-api-issuer: ${{ secrets.AMO_API_KEY }}
+          auth-api-secret: ${{ secrets.AMO_API_SECRET }}
 
