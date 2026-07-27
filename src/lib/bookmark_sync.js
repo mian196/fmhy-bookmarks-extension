@@ -76,6 +76,101 @@ async function cleanExistingFMHYFolders() {
 }
 
 /**
+ * Obtains or creates the primary "FMHY" root folder on the Bookmarks Bar.
+ * Reuses the existing root folder ID/GUID across sync runs to prevent
+ * Google Chrome Sync from spawning duplicate folders on mobile/synced devices.
+ * Removes any extra duplicate FMHY root folders and clears existing children in-place.
+ *
+ * @param {string} barId - Bookmarks Bar parent ID
+ * @param {string} title - Target root folder title (e.g. 'FMHY')
+ * @returns {Promise<Object>} The primary FMHY root bookmark node
+ */
+async function prepareFMHYRootFolder(barId, title = 'FMHY') {
+  let primaryRoot = null;
+
+  try {
+    const children = await api.bookmarks.getChildren(barId);
+    const fmhyFolders = (children || []).filter(
+      (child) => !child.url && child.title && child.title.toUpperCase().includes('FMHY')
+    );
+
+    if (fmhyFolders.length > 0) {
+      primaryRoot = fmhyFolders[0];
+
+      // Remove any secondary duplicate FMHY folders on the Bookmarks Bar if present
+      for (let i = 1; i < fmhyFolders.length; i++) {
+        try {
+          await api.bookmarks.removeTree(fmhyFolders[i].id);
+        } catch (err) {
+          console.warn(`Failed to remove duplicate folder ${fmhyFolders[i].id}:`, err);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error checking Bookmarks Bar children for FMHY root:', err);
+  }
+
+  // Fallback search if no FMHY folder was directly under Bookmarks Bar
+  if (!primaryRoot) {
+    try {
+      const matches = await api.bookmarks.search({ title: 'FMHY' });
+      const folderMatches = (matches || []).filter((m) => !m.url);
+      if (folderMatches.length > 0) {
+        primaryRoot = folderMatches[0];
+        try {
+          await api.bookmarks.move(primaryRoot.id, { parentId: barId, index: 0 });
+        } catch (e) {}
+
+        // Remove any other orphaned folder matches
+        for (let i = 1; i < folderMatches.length; i++) {
+          try {
+            await api.bookmarks.removeTree(folderMatches[i].id);
+          } catch (err) {}
+        }
+      }
+    } catch (err) {}
+  }
+
+  if (primaryRoot) {
+    // Empty existing children of the root folder in-place to preserve root ID/GUID
+    try {
+      const rootChildren = await api.bookmarks.getChildren(primaryRoot.id);
+      if (rootChildren && rootChildren.length > 0) {
+        for (const child of rootChildren) {
+          try {
+            await api.bookmarks.removeTree(child.id);
+          } catch (err) {
+            console.warn(`Failed to remove child ${child.id} from FMHY root:`, err);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to clean FMHY root folder children:', err);
+    }
+
+    // Ensure it's positioned at index 0 on the Bookmarks Bar and title matches
+    try {
+      await api.bookmarks.move(primaryRoot.id, { parentId: barId, index: 0 });
+    } catch (e) {}
+
+    if (primaryRoot.title !== title) {
+      try {
+        await api.bookmarks.update(primaryRoot.id, { title: title });
+      } catch (e) {}
+    }
+
+    return primaryRoot;
+  }
+
+  // If no existing FMHY root folder exists, create a new one at Index 0
+  return await api.bookmarks.create({
+    parentId: barId,
+    title: title || 'FMHY',
+    index: 0
+  });
+}
+
+/**
  * Recursively creates bookmarks and folders under a parent ID
  */
 async function buildBookmarkSubtree(parentId, childrenNodes) {
@@ -140,17 +235,10 @@ async function syncFMHYBookmarks(parsedTree) {
   try {
     const barId = await findBookmarksBarId();
 
-    // 1. Remove old FMHY folders
-    await cleanExistingFMHYFolders();
+    // 1. Prepare FMHY Root Folder in-place (reusing existing root ID/GUID if present)
+    const fmhyRoot = await prepareFMHYRootFolder(barId, parsedTree.title || 'FMHY');
 
-    // 2. Create new FMHY Root Folder at Index 0 (front of Bookmark Bar)
-    const fmhyRoot = await api.bookmarks.create({
-      parentId: barId,
-      title: parsedTree.title || 'FMHY',
-      index: 0
-    });
-
-    // 3. Populate subcategories and bookmark items
+    // 2. Populate subcategories and bookmark items
     const count = await buildBookmarkSubtree(fmhyRoot.id, parsedTree.children);
 
     return {
@@ -171,6 +259,8 @@ async function syncFMHYBookmarks(parsedTree) {
 if (typeof self !== 'undefined') {
   self.findBookmarksBarId = findBookmarksBarId;
   self.cleanExistingFMHYFolders = cleanExistingFMHYFolders;
+  self.prepareFMHYRootFolder = prepareFMHYRootFolder;
   self.buildBookmarkSubtree = buildBookmarkSubtree;
   self.syncFMHYBookmarks = syncFMHYBookmarks;
 }
+

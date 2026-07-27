@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- 🐛 **Duplicate FMHY Folder Prevention**: Added concurrency mutex lock in `service_worker.js` and direct Bookmarks Bar folder auditing in `bookmark_sync.js` to prevent duplicate FMHY folder creation during simultaneous startup/installation events.
+- 🐛 **Duplicate FMHY Folder Prevention**: Added concurrency mutex lock in `service_worker.js` and in-place root folder ID/GUID reuse (`prepareFMHYRootFolder`) in `bookmark_sync.js`. Prevents Google Chrome Sync from spawning duplicate FMHY folders on Android and Linux devices across sync runs.
 
 ---
 
