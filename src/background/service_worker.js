@@ -77,20 +77,29 @@ async function fetchLatestCommitSha(commitApiUrl, lastCommitETag = null) {
   return { unmodified: false, sha: null, etag: null };
 }
 
+let isSyncing = false;
+
 /**
  * Main Sync Workflow Execution
  * @param {Object} options - { isManual: boolean }
  */
 async function executeSync(options = { isManual: false }) {
-  const settings = await api.storage.sync.get(DEFAULT_SETTINGS);
-  const targets = await resolveTargetPaths();
+  if (isSyncing) {
+    console.log('Sync operation already in progress. Skipping concurrent trigger.');
+    return { success: true, count: 0, skipped: true };
+  }
 
-  await api.storage.local.set({
-    lastSyncStatus: 'syncing',
-    lastSyncMessage: `Checking ${targets.repo} for commit updates...`
-  });
+  isSyncing = true;
 
   try {
+    const settings = await api.storage.sync.get(DEFAULT_SETTINGS);
+    const targets = await resolveTargetPaths();
+
+    await api.storage.local.set({
+      lastSyncStatus: 'syncing',
+      lastSyncMessage: `Checking ${targets.repo} for commit updates...`
+    });
+
     const localState = await api.storage.local.get([
       'lastETag',
       'lastCommitSha',
@@ -199,6 +208,8 @@ async function executeSync(options = { isManual: false }) {
     );
 
     return { success: false, error: error.message };
+  } finally {
+    isSyncing = false;
   }
 }
 

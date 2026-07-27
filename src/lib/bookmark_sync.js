@@ -44,17 +44,32 @@ async function findBookmarksBarId() {
  * Safely removes any existing "FMHY" root folders from the bookmarks tree
  */
 async function cleanExistingFMHYFolders() {
-  // Search by title "FMHY"
-  const matches = await api.bookmarks.search({ title: 'FMHY' });
-  if (!matches || matches.length === 0) return;
+  try {
+    const barId = await findBookmarksBarId();
+    const children = await api.bookmarks.getChildren(barId);
+    if (children && children.length > 0) {
+      for (const child of children) {
+        if (!child.url && child.title && child.title.toUpperCase().includes('FMHY')) {
+          try {
+            await api.bookmarks.removeTree(child.id);
+          } catch (err) {
+            console.warn(`Failed to remove folder ${child.id}:`, err);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Error checking Bookmarks Bar children:', err);
+  }
 
-  for (const match of matches) {
-    // Only remove folder nodes (url is undefined for folders)
-    if (!match.url) {
-      try {
-        await api.bookmarks.removeTree(match.id);
-      } catch (err) {
-        console.warn(`Failed to remove tree ID ${match.id}:`, err);
+  // Also perform search fallback for any orphaned FMHY root folders
+  const matches = await api.bookmarks.search({ title: 'FMHY' });
+  if (matches && matches.length > 0) {
+    for (const match of matches) {
+      if (!match.url) {
+        try {
+          await api.bookmarks.removeTree(match.id);
+        } catch (err) {}
       }
     }
   }
