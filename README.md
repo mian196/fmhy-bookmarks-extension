@@ -35,7 +35,7 @@
 - ⚙️ **2-Strategy Target Selector**:
   - **Official FMHY Repository** (`fmhy/bookmarks`) — Track official community releases.
   - **Personal Fork Repository** — Track your custom personal GitHub fork and workflow runs.
-- 📁 **Preset Selection**: Choose between the **Full Directory** (~3,000+ links) or **Starred-Only Collection** (top-rated community recommendations).
+- 📁 **Preset Selection**: Choose between the **Full Directory** (~25,000+ links) or **Starred-Only Collection** (curated starred sites from the FMHY wiki).
 - 🔒 **Privacy-First**: No external tracking, no login requirements, and zero data collection.
 
 ---
