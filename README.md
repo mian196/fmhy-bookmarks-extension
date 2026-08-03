@@ -29,7 +29,8 @@
 
 ## ✨ Features
 
-- ⚡ **Automated GitHub Commit Tracking**: Checks GitHub API on browser startup (`chrome.runtime.onStartup`) and via periodic 6-hour alarms.
+- ⚡ **Automated GitHub Commit Tracking**: Automatically monitors GitHub for new commits on browser startup and via 6-hour periodic alarms, updating bookmarks when upstream changes occur.
+- 🔄 **Manual "Sync Now" Trigger**: Clicking **Sync Now** in the extension dashboard manually triggers an instant download and fresh bookmark tree synchronization on demand.
 - 🎨 **Apple Minimalist UI**: Clean Light & Dark Mode theme switcher, real-time commit telemetry, and custom vector icons.
 - ⚙️ **2-Strategy Target Selector**:
   - **Official FMHY Repository** (`fmhy/bookmarks`) — Track official community releases.
