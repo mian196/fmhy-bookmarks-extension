@@ -48,7 +48,9 @@ jobs:
       - name: Prepare Release Notes for AMO
         id: amo_notes
         run: |
-          if [ -f "gemini_release_notes.md" ]; then
+          if [ -f "amo_release_notes.md" ]; then
+            notes=$(cat amo_release_notes.md)
+          elif [ -f "gemini_release_notes.md" ]; then
             notes=$(cat gemini_release_notes.md)
           else
             notes="Release ${{ env.VERSION }} of FMHY Bookmarks Auto-Sync extension."

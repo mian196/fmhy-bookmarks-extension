@@ -30,12 +30,14 @@ def extract_changelog_section(version):
     pattern = rf"##\s*\[?{re.escape(version)}\]?.*?\n(.*?)(?=\n##\s*\[|\Z)"
     match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
     if match:
-        return match.group(1).strip()
+        section = match.group(1).strip()
+        section = re.sub(r'(\n\s*---\s*)+$', '', section).strip()
+        return section
     return ""
 
 def main():
     gemini_key = os.environ.get('GEMINI_API_KEY')
-    version = os.environ.get('VERSION', 'v1.4.0')
+    version = os.environ.get('VERSION', 'v1.4.3')
     clean_version = version.lstrip('v')
     
     changelog_text = extract_changelog_section(version) or extract_changelog_section(clean_version)
@@ -69,19 +71,22 @@ def main():
             print(f"Error calling Gemini API: {e}")
 
     if not notes:
-        print("Generating structured CHANGELOG.md & commit log release notes.")
+        print("Generating structured CHANGELOG.md release notes.")
         notes = f"## 🌟 Release {version}\n\n"
         if changelog_text:
-            notes += f"{changelog_text}\n\n"
-        if git_log:
-            notes += "### 📜 Commit History\n"
-            for line in git_log.split('\n'):
-                if line.strip():
-                    notes += f"- {line.strip()}\n"
+            notes += f"{changelog_text}\n"
+        else:
+            notes += f"Release {version} of FMHY Bookmarks Auto-Sync extension.\n"
 
     with open('gemini_release_notes.md', 'w', encoding='utf-8') as f:
         f.write(notes)
     print("Release notes file `gemini_release_notes.md` created successfully!")
+
+    # Generate clean Firefox AMO store release notes (actual changes only)
+    amo_notes = changelog_text if changelog_text else f"Release {version} of FMHY Bookmarks Auto-Sync extension."
+    with open('amo_release_notes.md', 'w', encoding='utf-8') as f:
+        f.write(amo_notes)
+    print("AMO release notes file `amo_release_notes.md` created successfully!")
 
 if __name__ == '__main__':
     main()
