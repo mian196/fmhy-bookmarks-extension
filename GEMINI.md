@@ -57,7 +57,7 @@ This document outlines the coding standards, workflow conventions, architectural
 ## 🦊 5. Firefox AMO Store Validation & Compliance
 
 * **Data Collection Declaration**: Include `data_collection_permissions` under `browser_specific_settings.gecko` set to `{"required": ["none"]}` in `platform/firefox/manifest.json`.
-* **Android Compatibility**: Set `"strict_min_version": "142.0"` in `platform/firefox/manifest.json` to ensure full compatibility with Firefox for Android without triggering validator warnings.
+* **Fork & ESR Compatibility**: Set `"strict_min_version": "115.0"` in `platform/firefox/manifest.json` to ensure full compatibility with Firefox ESR 115/128 and Firefox engine forks (Waterfox, Zen Browser, Floorp, LibreWolf).
 
 ---
 
