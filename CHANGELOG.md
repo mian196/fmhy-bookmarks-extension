@@ -5,6 +5,14 @@ All notable changes to the **FMHY Bookmarks Auto-Sync** extension will be docume
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- 🐛 **Starred-Only Startup Re-Sync Loop**: Tracked `lastPreset` in `storage.local` to detect preset changes and prevent ETags/commit SHAs from cached `full` collection runs causing redundant bookmark tree rebuilds on Firefox startup.
+- 🧹 **Options Cache Invalidation**: Automatically clear HTTP caching headers when saving or resetting preferences in `options.js`.
+
+---
+
 ## [v1.4.3] - 2026-08-11
 
 ### Changed

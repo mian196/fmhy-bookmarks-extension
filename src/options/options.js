@@ -149,7 +149,8 @@ async function saveSettings() {
 
   await api.storage.sync.set(newSettings);
 
-  // Notify background worker to reschedule alarm & refresh status
+  // Reset local cache & reschedule alarm for updated preferences
+  await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
   await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
 
   showToast('Preferences saved successfully!');
@@ -161,6 +162,7 @@ async function saveSettings() {
  */
 async function resetSettings() {
   await api.storage.sync.set(DEFAULT_SETTINGS);
+  await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
   await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
   await loadSettings();
   showToast('Settings reset to defaults.');

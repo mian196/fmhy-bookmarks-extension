@@ -104,8 +104,17 @@ async function executeSync(options = { isManual: false }) {
       'lastETag',
       'lastCommitSha',
       'lastCommitETag',
-      'lastBookmarkCount'
+      'lastBookmarkCount',
+      'lastPreset'
     ]);
+
+    // Reset local cached headers if preset target changed since last sync
+    if (localState.lastPreset && localState.lastPreset !== settings.preset) {
+      console.log(`Preset changed from '${localState.lastPreset}' to '${settings.preset}'. Clearing local HTTP cache.`);
+      localState.lastETag = null;
+      localState.lastCommitSha = null;
+      localState.lastCommitETag = null;
+    }
 
     // 1. Automatic ETag & Commit SHA Verification
     const commitCheck = await fetchLatestCommitSha(targets.commitApiUrl, localState.lastCommitETag);
@@ -115,7 +124,8 @@ async function executeSync(options = { isManual: false }) {
       await api.storage.local.set({
         lastSyncStatus: 'success',
         lastSyncTime: nowIso,
-        lastSyncMessage: `Up to date (304 Not Modified - 0 API credits used)`
+        lastSyncMessage: `Up to date (304 Not Modified - 0 API credits used)`,
+        lastPreset: settings.preset
       });
       return { success: true, count: localState.lastBookmarkCount || 0, modified: false };
     }
@@ -128,7 +138,8 @@ async function executeSync(options = { isManual: false }) {
         lastSyncStatus: 'success',
         lastSyncTime: nowIso,
         lastCommitETag: commitCheck.etag || localState.lastCommitETag,
-        lastSyncMessage: `Up to date with GitHub commit ${latestSha.substring(0, 7)}`
+        lastSyncMessage: `Up to date with GitHub commit ${latestSha.substring(0, 7)}`,
+        lastPreset: settings.preset
       });
       return { success: true, count: localState.lastBookmarkCount || 0, modified: false };
     }
@@ -146,7 +157,8 @@ async function executeSync(options = { isManual: false }) {
       await api.storage.local.set({
         lastSyncStatus: 'success',
         lastSyncTime: nowIso,
-        lastSyncMessage: 'Upstream bookmarks unchanged (304 Not Modified)'
+        lastSyncMessage: 'Upstream bookmarks unchanged (304 Not Modified)',
+        lastPreset: settings.preset
       });
       return { success: true, count: localState.lastBookmarkCount || 0, modified: false };
     }
@@ -183,7 +195,8 @@ async function executeSync(options = { isManual: false }) {
       lastETag: newETag || null,
       lastCommitETag: commitCheck.etag || localState.lastCommitETag || null,
       lastCommitSha: latestSha || null,
-      lastSourceUrl: targets.rawUrl
+      lastSourceUrl: targets.rawUrl,
+      lastPreset: settings.preset
     });
 
     showNotification(
@@ -314,7 +327,7 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateAlarmSchedule().then(() => sendResponse({ success: true }));
     return true;
   } else if (message.action === 'CLEAR_CACHE') {
-    api.storage.local.set({ lastETag: null, lastCommitSha: null, lastCommitETag: null }).then(() => sendResponse({ success: true }));
+    api.storage.local.set({ lastETag: null, lastCommitSha: null, lastCommitETag: null, lastPreset: null }).then(() => sendResponse({ success: true }));
     return true;
   }
 });
