@@ -7,6 +7,7 @@
 
 
 const presetRadios = document.getElementsByName('preset');
+const syncLocationRadios = document.getElementsByName('syncLocation');
 const strategyRadios = document.getElementsByName('strategy');
 
 const panelCustomFork = document.getElementById('panel-custom-fork');
@@ -24,6 +25,7 @@ const toast = document.getElementById('toast');
 
 const DEFAULT_SETTINGS = {
   preset: 'full',
+  syncLocation: 'toolbar', // 'toolbar' | 'other' | 'menu'
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
   customFilePath: '',
@@ -105,6 +107,10 @@ async function loadSettings() {
     radio.checked = (radio.value === settings.preset);
   }
 
+  for (const radio of syncLocationRadios) {
+    radio.checked = (radio.value === (settings.syncLocation || 'toolbar'));
+  }
+
   for (const radio of strategyRadios) {
     radio.checked = (radio.value === (settings.strategy || 'official'));
   }
@@ -132,6 +138,7 @@ function showToast(msg) {
  */
 async function saveSettings() {
   const selectedPreset = Array.from(presetRadios).find(r => r.checked)?.value || 'full';
+  const selectedSyncLocation = Array.from(syncLocationRadios).find(r => r.checked)?.value || 'toolbar';
   const selectedStrategy = Array.from(strategyRadios).find(r => r.checked)?.value || 'official';
 
   if (selectedStrategy === 'custom_fork' && !forkRepoInput.value.trim()) {
@@ -141,6 +148,7 @@ async function saveSettings() {
 
   const newSettings = {
     preset: selectedPreset,
+    syncLocation: selectedSyncLocation,
     strategy: selectedStrategy,
     forkRepo: forkRepoInput.value.trim(),
     customFilePath: customFilePathInput.value.trim(),
@@ -149,11 +157,12 @@ async function saveSettings() {
 
   await api.storage.sync.set(newSettings);
 
-  // Reset local cache & reschedule alarm for updated preferences
+  // Reset local cache & trigger immediate sync for target location updates
   await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
   await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
+  await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
 
-  showToast('Preferences saved successfully!');
+  showToast('Preferences saved & FMHY location updated!');
   updateDynamicPanels();
 }
 
@@ -164,12 +173,16 @@ async function resetSettings() {
   await api.storage.sync.set(DEFAULT_SETTINGS);
   await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
   await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
+  await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
   await loadSettings();
   showToast('Settings reset to defaults.');
 }
 
 // Attach Event Listeners
 for (const radio of presetRadios) {
+  radio.addEventListener('change', updateDynamicPanels);
+}
+for (const radio of syncLocationRadios) {
   radio.addEventListener('change', updateDynamicPanels);
 }
 for (const radio of strategyRadios) {

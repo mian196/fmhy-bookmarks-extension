@@ -56,10 +56,54 @@
         </div>
       </section>
 
-      <!-- Section 2: Repository Target Strategy -->
+      <!-- Section 2: Bookmark Target Location -->
       <section class="card">
         <div class="card-header">
-          <h2>2. Sync Source Repository</h2>
+          <h2>2. Bookmark Sync Location</h2>
+          <p>Choose where the FMHY bookmark directory is placed inside your browser.</p>
+        </div>
+        <div class="card-body">
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="syncLocation" value="toolbar" checked>
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Bookmarks Bar / Toolbar</span>
+                  <span class="badge badge-cyan">Default (Index 0)</span>
+                </div>
+                <span class="radio-desc">Mounts the FMHY directory at position 0 directly on your main Bookmarks Bar.</span>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="syncLocation" value="other">
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Other Bookmarks</span>
+                  <span class="badge badge-purple">Other / Unfiled</span>
+                </div>
+                <span class="radio-desc">Places the FMHY directory inside your browser's "Other Bookmarks" container.</span>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="syncLocation" value="menu">
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Bookmarks Menu</span>
+                  <span class="badge badge-emerald">Firefox Only</span>
+                </div>
+                <span class="radio-desc">Places the FMHY directory inside the Firefox Bookmarks Menu container.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Repository Target Strategy -->
+      <section class="card">
+        <div class="card-header">
+          <h2>3. Sync Source Repository</h2>
           <p>The extension monitors GitHub on startup and syncs whenever a new commit is detected.</p>
         </div>
 

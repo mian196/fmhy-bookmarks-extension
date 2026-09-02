@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - ⚡ **Incremental Diffing Sync Engine**: Implemented tree reconciliation (`reconcileBookmarkSubtree`) in `bookmark_sync.js`. Reuses existing folder IDs and bookmark nodes to eliminate sync churn and prevent duplicate root folders across Chrome Sync and Firefox Sync devices.
+- 📂 **Customizable Sync Target Location**: Added a preference in Options (`options.html`) allowing users to choose where the FMHY directory is synced (Bookmarks Bar, Other Bookmarks, or Firefox Bookmarks Menu) with instant in-place folder re-location.
 
 ### Performance
 - 🚀 **Parallel Subtree Reconciliation & Batch Processing**: Concurrently processes subfolder trees per level and increased link creation batch sizes from 25 to 100 promises for faster initial setup and <1s routine re-syncs.

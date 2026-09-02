@@ -9,6 +9,15 @@
  * Finds the browser's Bookmarks Bar / Toolbar root node ID
  */
 async function findBookmarksBarId() {
+  return await resolveTargetParentId('toolbar');
+}
+
+/**
+ * Resolves the target parent container ID based on user setting ('toolbar' | 'other' | 'menu')
+ * @param {string} syncLocation - Target location ('toolbar' | 'other' | 'menu')
+ * @returns {Promise<string>} Target parent container bookmark node ID
+ */
+async function resolveTargetParentId(syncLocation = 'toolbar') {
   const tree = await api.bookmarks.getTree();
   const root = tree[0];
 
@@ -16,17 +25,44 @@ async function findBookmarksBarId() {
     throw new Error('Unable to access browser bookmarks tree.');
   }
 
-  // 1. Check known Chromium & Firefox IDs directly
-  for (const child of root.children) {
-    // Chromium: '1' is 'Bookmarks bar'
-    // Firefox: 'toolbar_____' is 'Bookmarks Toolbar'
+  const children = root.children;
+
+  if (syncLocation === 'other') {
+    // Chromium: '2' is 'Other bookmarks'
+    // Firefox: 'unfiled_____' is 'Other Bookmarks' / 'Unfiled Bookmarks'
+    for (const child of children) {
+      if (child.id === '2' || child.id === 'unfiled_____') {
+        return child.id;
+      }
+    }
+    for (const child of children) {
+      const titleLower = (child.title || '').toLowerCase();
+      if (titleLower.includes('other') || titleLower.includes('unfiled')) {
+        return child.id;
+      }
+    }
+  } else if (syncLocation === 'menu') {
+    // Firefox: 'menu________' is 'Bookmarks Menu'
+    for (const child of children) {
+      if (child.id === 'menu________') {
+        return child.id;
+      }
+    }
+    for (const child of children) {
+      const titleLower = (child.title || '').toLowerCase();
+      if (titleLower.includes('menu')) {
+        return child.id;
+      }
+    }
+  }
+
+  // Default: 'toolbar' (Bookmarks bar / Bookmarks Toolbar)
+  for (const child of children) {
     if (child.id === '1' || child.id === 'toolbar_____') {
       return child.id;
     }
   }
-
-  // 2. Search by title / type keywords
-  for (const child of root.children) {
+  for (const child of children) {
     const titleLower = (child.title || '').toLowerCase();
     if (
       titleLower.includes('bookmark bar') ||
@@ -37,8 +73,8 @@ async function findBookmarksBarId() {
     }
   }
 
-  // 3. Fallback to first child of root
-  return root.children[0].id;
+  // Fallback to first child of root
+  return children[0].id;
 }
 
 /**
@@ -77,20 +113,19 @@ async function cleanExistingFMHYFolders() {
 }
 
 /**
- * Obtains or creates the primary "FMHY" root folder on the Bookmarks Bar.
- * Reuses the existing root folder ID/GUID across sync runs to prevent
- * Google Chrome Sync / Firefox Sync from spawning duplicate folders on mobile/synced devices.
- * Removes any extra duplicate FMHY root folders on the Bookmarks Bar if present.
+ * Obtains or creates the primary "FMHY" root folder inside the target container.
+ * Reuses the existing root folder ID/GUID across sync runs and seamlessly moves it
+ * if the target container setting changes.
  *
- * @param {string} barId - Bookmarks Bar parent ID
+ * @param {string} targetParentId - Target container parent ID
  * @param {string} title - Target root folder title (e.g. 'FMHY')
  * @returns {Promise<Object>} The primary FMHY root bookmark node
  */
-async function prepareFMHYRootFolder(barId, title = 'FMHY') {
+async function prepareFMHYRootFolder(targetParentId, title = 'FMHY') {
   let primaryRoot = null;
 
   try {
-    const children = await api.bookmarks.getChildren(barId);
+    const children = await api.bookmarks.getChildren(targetParentId);
     const fmhyFolders = (children || []).filter(
       (child) => !child.url && child.title && child.title.toUpperCase().includes('FMHY')
     );
@@ -98,7 +133,7 @@ async function prepareFMHYRootFolder(barId, title = 'FMHY') {
     if (fmhyFolders.length > 0) {
       primaryRoot = fmhyFolders[0];
 
-      // Remove any secondary duplicate FMHY folders on the Bookmarks Bar if present
+      // Remove any secondary duplicate FMHY folders in this container if present
       for (let i = 1; i < fmhyFolders.length; i++) {
         try {
           await api.bookmarks.removeTree(fmhyFolders[i].id);
@@ -108,10 +143,10 @@ async function prepareFMHYRootFolder(barId, title = 'FMHY') {
       }
     }
   } catch (err) {
-    console.warn('Error checking Bookmarks Bar children for FMHY root:', err);
+    console.warn('Error checking target container children for FMHY root:', err);
   }
 
-  // Fallback search if no FMHY folder was directly under Bookmarks Bar
+  // Fallback search across all bookmarks if no FMHY folder was in target parent
   if (!primaryRoot) {
     try {
       const matches = await api.bookmarks.search({ title: 'FMHY' });
@@ -119,7 +154,7 @@ async function prepareFMHYRootFolder(barId, title = 'FMHY') {
       if (folderMatches.length > 0) {
         primaryRoot = folderMatches[0];
         try {
-          await api.bookmarks.move(primaryRoot.id, { parentId: barId, index: 0 });
+          await api.bookmarks.move(primaryRoot.id, { parentId: targetParentId, index: 0 });
         } catch (e) {}
 
         // Remove any other orphaned folder matches
@@ -133,9 +168,9 @@ async function prepareFMHYRootFolder(barId, title = 'FMHY') {
   }
 
   if (primaryRoot) {
-    // Ensure it's positioned at index 0 on the Bookmarks Bar and title matches
+    // Ensure it's positioned at index 0 in the target container and title matches
     try {
-      await api.bookmarks.move(primaryRoot.id, { parentId: barId, index: 0 });
+      await api.bookmarks.move(primaryRoot.id, { parentId: targetParentId, index: 0 });
     } catch (e) {}
 
     if (primaryRoot.title !== title) {
@@ -147,9 +182,9 @@ async function prepareFMHYRootFolder(barId, title = 'FMHY') {
     return primaryRoot;
   }
 
-  // If no existing FMHY root folder exists, create a new one at Index 0
+  // If no existing FMHY root folder exists, create a new one at Index 0 inside targetParentId
   return await api.bookmarks.create({
-    parentId: barId,
+    parentId: targetParentId,
     title: title || 'FMHY',
     index: 0
   });
@@ -335,16 +370,17 @@ async function buildBookmarkSubtree(parentId, childrenNodes) {
 }
 
 /**
- * Performs incremental diffing sync of FMHY bookmark tree to the Bookmarks Bar
+ * Performs incremental diffing sync of FMHY bookmark tree to the selected target container
  * @param {Object} parsedTree - Parsed FMHY tree root from html_parser
+ * @param {string} [syncLocation='toolbar'] - Target location ('toolbar' | 'other' | 'menu')
  * @returns {Promise<{ success: boolean, count: number, rootId?: string, error?: string }>}
  */
-async function syncFMHYBookmarks(parsedTree) {
+async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
   try {
-    const barId = await findBookmarksBarId();
+    const targetParentId = await resolveTargetParentId(syncLocation);
 
-    // 1. Prepare FMHY Root Folder in-place (reusing existing root ID/GUID if present)
-    const fmhyRoot = await prepareFMHYRootFolder(barId, parsedTree.title || 'FMHY');
+    // 1. Prepare FMHY Root Folder in-place at target container
+    const fmhyRoot = await prepareFMHYRootFolder(targetParentId, parsedTree.title || 'FMHY');
 
     // 2. Perform incremental diffing sync under FMHY root
     const count = await reconcileBookmarkSubtree(fmhyRoot.id, parsedTree.children);
@@ -366,11 +402,13 @@ async function syncFMHYBookmarks(parsedTree) {
 
 if (typeof self !== 'undefined') {
   self.findBookmarksBarId = findBookmarksBarId;
+  self.resolveTargetParentId = resolveTargetParentId;
   self.cleanExistingFMHYFolders = cleanExistingFMHYFolders;
   self.prepareFMHYRootFolder = prepareFMHYRootFolder;
   self.reconcileBookmarkSubtree = reconcileBookmarkSubtree;
   self.buildBookmarkSubtree = buildBookmarkSubtree;
   self.syncFMHYBookmarks = syncFMHYBookmarks;
 }
+
 
 

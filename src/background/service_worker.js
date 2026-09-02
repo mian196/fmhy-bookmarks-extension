@@ -18,7 +18,8 @@ const DEFAULT_SETTINGS = {
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
   customFilePath: '',
-  notifyOnSync: false
+  notifyOnSync: false,
+  syncLocation: 'toolbar' // 'toolbar' | 'other' | 'menu'
 };
 
 const OFFICIAL_REPO = 'fmhy/bookmarks';
@@ -177,10 +178,10 @@ async function executeSync(options = { isManual: false }) {
     const parsedTree = parseBookmarkHTML(htmlText);
 
     await api.storage.local.set({
-      lastSyncMessage: 'Updating browser Bookmarks Bar...'
+      lastSyncMessage: 'Updating browser bookmarks tree...'
     });
 
-    const syncResult = await syncFMHYBookmarks(parsedTree);
+    const syncResult = await syncFMHYBookmarks(parsedTree, settings.syncLocation || 'toolbar');
 
     if (!syncResult.success) {
       throw new Error(syncResult.error || 'Failed to update browser bookmarks.');
