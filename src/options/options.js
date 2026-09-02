@@ -170,6 +170,19 @@ function showToast(msg, autoHide = true) {
 }
 
 /**
+ * Resolves human-readable label for target destination
+ */
+function getDestinationLabel(syncLocation) {
+  if (syncLocation === 'other') {
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+    return isFirefox ? 'Other Bookmarks' : 'Other Bookmarks / All Bookmarks';
+  } else if (syncLocation === 'menu') {
+    return 'Bookmarks Menu';
+  }
+  return 'Bookmarks Bar';
+}
+
+/**
  * Save settings to chrome.storage.sync
  */
 async function saveSettings() {
@@ -182,12 +195,14 @@ async function saveSettings() {
     return;
   }
 
+  const destLabel = getDestinationLabel(selectedSyncLocation);
+
   // Disable UI buttons and display loading status
   btnSave.disabled = true;
   btnReset.disabled = true;
   const originalSaveText = btnSave.textContent;
   btnSave.textContent = 'Moving folder...';
-  showToast('Moving FMHY folder to selected location...', false);
+  showToast(`Moving FMHY folder to ${destLabel}...`, false);
 
   try {
     const newSettings = {
@@ -209,11 +224,11 @@ async function saveSettings() {
     const syncRes = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
 
     if (syncRes && syncRes.success) {
-      showToast('Settings saved & FMHY folder moved successfully!');
+      showToast(`Settings saved & FMHY folder moved to ${destLabel}!`);
     } else if (syncRes && syncRes.error) {
-      showToast(`Sync notice: ${syncRes.error}`);
+      showToast(`Notice: ${syncRes.error}`);
     } else {
-      showToast('Preferences saved & FMHY location updated!');
+      showToast(`Preferences saved & FMHY folder moved to ${destLabel}!`);
     }
   } catch (err) {
     showToast(`Error: ${err.message || 'Failed to update preferences.'}`);
@@ -233,7 +248,7 @@ async function resetSettings() {
   btnReset.disabled = true;
   const originalResetText = btnReset.textContent;
   btnReset.textContent = 'Resetting...';
-  showToast('Resetting settings & re-locating FMHY folder...', false);
+  showToast('Resetting settings & moving FMHY folder to Bookmarks Bar...', false);
 
   try {
     await api.storage.sync.set(DEFAULT_SETTINGS);
@@ -241,7 +256,7 @@ async function resetSettings() {
     await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
     await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
     await loadSettings();
-    showToast('Settings reset to defaults & FMHY folder updated!');
+    showToast('Settings reset & FMHY folder moved to Bookmarks Bar!');
   } catch (err) {
     showToast(`Error: ${err.message || 'Failed to reset settings.'}`);
   } finally {
