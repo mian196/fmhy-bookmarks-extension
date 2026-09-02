@@ -200,9 +200,11 @@ async function executeSync(options = { isManual: false }) {
       lastPreset: settings.preset
     });
 
+    const locationLabel = getNotificationLocationLabel(settings.syncLocation);
+
     showNotification(
       'FMHY Bookmarks Synced',
-      `Updated ${syncResult.count} bookmarks on your Bookmarks Bar.`
+      `Updated ${syncResult.count} bookmarks in ${locationLabel}.`
     );
 
     return { success: true, count: syncResult.count, modified: true };
@@ -225,6 +227,18 @@ async function executeSync(options = { isManual: false }) {
   } finally {
     isSyncing = false;
   }
+}
+
+/**
+ * Resolves location name for notification messages
+ */
+function getNotificationLocationLabel(syncLocation) {
+  if (syncLocation === 'other') {
+    return 'Other Bookmarks';
+  } else if (syncLocation === 'menu') {
+    return 'Bookmarks Menu';
+  }
+  return 'Bookmarks Bar';
 }
 
 /**
