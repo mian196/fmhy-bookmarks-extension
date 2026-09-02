@@ -5,6 +5,16 @@ All notable changes to the **FMHY Bookmarks Auto-Sync** extension will be docume
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- ⚡ **Incremental Diffing Sync Engine**: Implemented tree reconciliation (`reconcileBookmarkSubtree`) in `bookmark_sync.js`. Reuses existing folder IDs and bookmark nodes to eliminate sync churn and prevent duplicate root folders across Chrome Sync and Firefox Sync devices.
+
+### Performance
+- 🚀 **Parallel Subtree Reconciliation & Batch Processing**: Concurrently processes subfolder trees per level and increased link creation batch sizes from 25 to 100 promises for faster initial setup and <1s routine re-syncs.
+
+---
+
 ## [v1.4.4] - 2026-08-27
 
 ### Fixed
