@@ -9,7 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - ⚡ **Incremental Diffing Sync Engine**: Implemented tree reconciliation (`reconcileBookmarkSubtree`) in `bookmark_sync.js`. Reuses existing folder IDs and bookmark nodes to eliminate sync churn and prevent duplicate root folders across Chrome Sync and Firefox Sync devices.
-- 📂 **Customizable Sync Target Location**: Added a preference in Options (`options.html`) allowing users to choose where the FMHY directory is synced (Bookmarks Bar, Other Bookmarks, or Firefox Bookmarks Menu) with instant in-place folder re-location.
+- 📂 **Customizable Sync Target Location**: Added a preference in Options (`options.html`) allowing users to choose where the FMHY directory is synced:
+  - **Bookmarks Bar**: Mounts FMHY at position 0 directly on the main Bookmarks Bar.
+  - **Other Bookmarks / All Bookmarks**: Places FMHY inside Other Bookmarks (populates Chrome *"All Bookmarks"* side panel).
+  - **Bookmarks Menu**: Firefox-exclusive container that hides FMHY from toolbar/other bookmarks and keeps it in the Bookmark Manager / Library.
+
+### Fixed
+- 🔔 **Dynamic Desktop Notification Target Labels**: Updated `service_worker.js` to dynamically format notification location names (e.g., *"Updated 26609 bookmarks in Other Bookmarks"*) matching the user's configured sync location.
+- ⏳ **Options Re-location Progress Feedback**: Added live progress status (`"Moving FMHY folder to destination..."`) and explicit `await` synchronization in `options.js` to disable controls until background folder re-location completes.
 
 ### Performance
 - 🚀 **Parallel Subtree Reconciliation & Batch Processing**: Concurrently processes subfolder trees per level and increased link creation batch sizes from 25 to 100 promises for faster initial setup and <1s routine re-syncs.
