@@ -26,6 +26,9 @@ async function resolveTargetParentId(syncLocation = 'toolbar') {
   }
 
   const children = root.children;
+  const isFirefox = typeof self !== 'undefined' && self.navigator
+    ? self.navigator.userAgent.toLowerCase().includes('firefox')
+    : false;
 
   if (syncLocation === 'other') {
     // Chromium: '2' is 'Other bookmarks'
@@ -42,16 +45,26 @@ async function resolveTargetParentId(syncLocation = 'toolbar') {
       }
     }
   } else if (syncLocation === 'menu') {
-    // Firefox: 'menu________' is 'Bookmarks Menu'
-    for (const child of children) {
-      if (child.id === 'menu________') {
-        return child.id;
+    // Option 3: Bookmarks Menu container is exclusive to Firefox
+    if (isFirefox) {
+      for (const child of children) {
+        if (child.id === 'menu________') {
+          return child.id;
+        }
       }
-    }
-    for (const child of children) {
-      const titleLower = (child.title || '').toLowerCase();
-      if (titleLower.includes('menu')) {
-        return child.id;
+      for (const child of children) {
+        const titleLower = (child.title || '').toLowerCase();
+        if (titleLower.includes('menu')) {
+          return child.id;
+        }
+      }
+    } else {
+      console.warn('[FMHY] "Bookmarks Menu" container is exclusive to Firefox and not supported on Chrome. Falling back to "Other Bookmarks".');
+      // Chrome fallback to 'Other Bookmarks' container ('2')
+      for (const child of children) {
+        if (child.id === '2' || child.id === 'unfiled_____') {
+          return child.id;
+        }
       }
     }
   }

@@ -160,6 +160,11 @@ body {
   color: #9333ea;
 }
 
+.badge-warning {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
 /* Radio Group */
 .radio-group {
   display: flex;
@@ -177,6 +182,16 @@ body {
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.radio-card.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--subpanel-bg);
+}
+
+.radio-card.disabled input[type="radio"] {
+  cursor: not-allowed;
 }
 
 .radio-card:hover {

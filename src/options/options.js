@@ -103,6 +103,34 @@ async function loadSettings() {
     document.documentElement.setAttribute('data-theme', settings.theme);
   }
 
+  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+  const cardLocationMenu = document.getElementById('card-location-menu');
+  const badgeLocationMenu = document.getElementById('badge-location-menu');
+  const descLocationMenu = document.getElementById('desc-location-menu');
+
+  if (!isFirefox) {
+    // Disable Option 3 (Bookmarks Menu) on Chrome/Chromium
+    const menuRadio = Array.from(syncLocationRadios).find(r => r.value === 'menu');
+    if (menuRadio) {
+      menuRadio.disabled = true;
+    }
+    if (cardLocationMenu) {
+      cardLocationMenu.classList.add('disabled');
+    }
+    if (badgeLocationMenu) {
+      badgeLocationMenu.className = 'badge badge-warning';
+      badgeLocationMenu.textContent = '⚠️ Firefox Only (Not Supported on Chrome)';
+    }
+    if (descLocationMenu) {
+      descLocationMenu.textContent = 'Bookmarks Menu container is exclusive to Firefox. Please select Bookmarks Bar or Other Bookmarks on Chrome.';
+    }
+
+    if (settings.syncLocation === 'menu') {
+      settings.syncLocation = 'toolbar';
+      await api.storage.sync.set({ syncLocation: 'toolbar' });
+    }
+  }
+
   for (const radio of presetRadios) {
     radio.checked = (radio.value === settings.preset);
   }
@@ -190,6 +218,17 @@ for (const radio of strategyRadios) {
 }
 
 forkRepoInput.addEventListener('blur', updateDynamicPanels);
+
+const cardLocationMenu = document.getElementById('card-location-menu');
+if (cardLocationMenu) {
+  cardLocationMenu.addEventListener('click', (e) => {
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+    if (!isFirefox) {
+      e.preventDefault();
+      showToast('⚠️ Bookmarks Menu is exclusive to Firefox. Please select Bookmarks Bar or Other Bookmarks on Chrome.');
+    }
+  });
+}
 
 btnSave.addEventListener('click', saveSettings);
 btnReset.addEventListener('click', resetSettings);
