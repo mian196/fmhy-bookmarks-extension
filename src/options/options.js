@@ -150,15 +150,23 @@ async function loadSettings() {
   updateDynamicPanels();
 }
 
+let toastTimeout = null;
+
 /**
  * Show temporary toast message
  */
-function showToast(msg) {
+function showToast(msg, autoHide = true) {
+  if (toastTimeout) {
+    clearTimeout(toastTimeout);
+    toastTimeout = null;
+  }
   toast.textContent = msg;
   toast.classList.remove('hidden');
-  setTimeout(() => {
-    toast.classList.add('hidden');
-  }, 3500);
+  if (autoHide) {
+    toastTimeout = setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 4000);
+  }
 }
 
 /**
@@ -174,36 +182,74 @@ async function saveSettings() {
     return;
   }
 
-  const newSettings = {
-    preset: selectedPreset,
-    syncLocation: selectedSyncLocation,
-    strategy: selectedStrategy,
-    forkRepo: forkRepoInput.value.trim(),
-    customFilePath: customFilePathInput.value.trim(),
-    notifyOnSync: notifySyncCheckbox.checked
-  };
+  // Disable UI buttons and display loading status
+  btnSave.disabled = true;
+  btnReset.disabled = true;
+  const originalSaveText = btnSave.textContent;
+  btnSave.textContent = 'Moving folder...';
+  showToast('Moving FMHY folder to selected location...', false);
 
-  await api.storage.sync.set(newSettings);
+  try {
+    const newSettings = {
+      preset: selectedPreset,
+      syncLocation: selectedSyncLocation,
+      strategy: selectedStrategy,
+      forkRepo: forkRepoInput.value.trim(),
+      customFilePath: customFilePathInput.value.trim(),
+      notifyOnSync: notifySyncCheckbox.checked
+    };
 
-  // Reset local cache & trigger immediate sync for target location updates
-  await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
-  await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
-  await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
+    await api.storage.sync.set(newSettings);
 
-  showToast('Preferences saved & FMHY location updated!');
-  updateDynamicPanels();
+    // Reset local cache & trigger immediate sync for target location updates
+    await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
+    await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
+
+    // Await background sync completion until move finishes
+    const syncRes = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
+
+    if (syncRes && syncRes.success) {
+      showToast('Settings saved & FMHY folder moved successfully!');
+    } else if (syncRes && syncRes.error) {
+      showToast(`Sync notice: ${syncRes.error}`);
+    } else {
+      showToast('Preferences saved & FMHY location updated!');
+    }
+  } catch (err) {
+    showToast(`Error: ${err.message || 'Failed to update preferences.'}`);
+  } finally {
+    btnSave.disabled = false;
+    btnReset.disabled = false;
+    btnSave.textContent = originalSaveText;
+    updateDynamicPanels();
+  }
 }
 
 /**
  * Reset settings to default values
  */
 async function resetSettings() {
-  await api.storage.sync.set(DEFAULT_SETTINGS);
-  await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
-  await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
-  await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
-  await loadSettings();
-  showToast('Settings reset to defaults.');
+  btnSave.disabled = true;
+  btnReset.disabled = true;
+  const originalResetText = btnReset.textContent;
+  btnReset.textContent = 'Resetting...';
+  showToast('Resetting settings & re-locating FMHY folder...', false);
+
+  try {
+    await api.storage.sync.set(DEFAULT_SETTINGS);
+    await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
+    await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
+    await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
+    await loadSettings();
+    showToast('Settings reset to defaults & FMHY folder updated!');
+  } catch (err) {
+    showToast(`Error: ${err.message || 'Failed to reset settings.'}`);
+  } finally {
+    btnSave.disabled = false;
+    btnReset.disabled = false;
+    btnReset.textContent = originalResetText;
+    updateDynamicPanels();
+  }
 }
 
 // Attach Event Listeners
