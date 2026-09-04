@@ -34,7 +34,7 @@
 - 🎨 **Apple Minimalist UI**: Clean Light & Dark Mode theme switcher, real-time commit telemetry, and custom vector icons.
 - ⚙️ **2-Strategy Target Selector**:
   - **Official FMHY Repository** (`fmhy/bookmarks`) — Track official community releases.
-  - **Personal Fork Repository** — Track your custom personal GitHub fork and workflow runs.
+  - **Personal Fork Repository** — Track your custom personal GitHub fork and workflow runs (supports both public and private repos via optional GitHub PAT).
 - 📁 **Preset Selection**: Choose between the **Full Directory** (~25,000+ links) or **Starred-Only Collection** (curated starred sites from the FMHY wiki).
 - 🔒 **Privacy-First**: No external tracking, no login requirements, and zero data collection.
 
