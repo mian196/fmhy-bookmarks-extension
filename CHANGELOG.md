@@ -5,6 +5,13 @@ All notable changes to the **FMHY Bookmarks Auto-Sync** extension will be docume
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- 🔑 **Private Repository Support (GitHub PAT Authentication)**: Added optional GitHub Personal Access Token (PAT) authentication under the Personal Fork strategy. Enables automated synchronization from private repositories via GitHub's raw contents API and elevates rate limits to 5,000 requests/hour.
+
+---
+
 ## [v1.5.0] - 2026-09-02
 
 ### Added

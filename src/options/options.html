@@ -159,6 +159,23 @@
               <input type="text" id="custom-file-path" placeholder="fmhy_in_bookmarks.html">
               <span class="form-hint">Leave blank to use default preset filename.</span>
             </div>
+            <div class="form-group margin-top">
+              <label for="github-token">GitHub Personal Access Token (Optional)</label>
+              <div class="token-input-wrapper">
+                <input type="password" id="github-token" placeholder="ghp_... or github_pat_..." autocomplete="off" spellcheck="false">
+                <button type="button" id="btn-toggle-token" class="btn-toggle-visibility" title="Toggle token visibility" aria-label="Toggle token visibility">
+                  <svg id="icon-token-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <svg id="icon-token-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                </button>
+              </div>
+              <span class="form-hint">Required only for private repositories. Needs read-only access to repository contents.</span>
+            </div>
           </div>
 
           <!-- Live Status Box -->

@@ -18,6 +18,7 @@ const DEFAULT_SETTINGS = {
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
   customFilePath: '',
+  githubToken: '',
   notifyOnSync: false,
   syncLocation: 'toolbar' // 'toolbar' | 'other' | 'menu'
 };
@@ -35,26 +36,35 @@ async function resolveTargetPaths() {
   let filename = (settings.preset === 'starred')
     ? 'fmhy_in_bookmarks_starred_only.html'
     : 'fmhy_in_bookmarks.html';
+  let githubToken = '';
 
   if (settings.strategy === 'custom_fork' && settings.forkRepo) {
     repo = settings.forkRepo.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '').trim();
     if (settings.customFilePath && settings.customFilePath.trim()) {
       filename = settings.customFilePath.trim();
     }
+    if (settings.githubToken && settings.githubToken.trim()) {
+      githubToken = settings.githubToken.trim();
+    }
   }
 
-  const rawUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/${branch}/${filename}`;
+  const rawUrl = githubToken
+    ? `https://api.github.com/repos/${repo}/contents/${filename}?ref=${branch}`
+    : `https://raw.githubusercontent.com/${repo}/refs/heads/${branch}/${filename}`;
   const commitApiUrl = `https://api.github.com/repos/${repo}/commits?path=${filename}&sha=${branch}&per_page=1`;
 
-  return { repo, branch, filename, rawUrl, commitApiUrl };
+  return { repo, branch, filename, rawUrl, commitApiUrl, githubToken };
 }
 
 /**
  * Query GitHub Commit API with ETag support to prevent rate-limit usage
  */
-async function fetchLatestCommitSha(commitApiUrl, lastCommitETag = null) {
+async function fetchLatestCommitSha(commitApiUrl, lastCommitETag = null, githubToken = '') {
   try {
     const headers = { 'Cache-Control': 'no-cache' };
+    if (githubToken) {
+      headers['Authorization'] = `Bearer ${githubToken}`;
+    }
     if (lastCommitETag) {
       headers['If-None-Match'] = lastCommitETag;
     }
@@ -118,7 +128,7 @@ async function executeSync(options = { isManual: false }) {
     }
 
     // 1. Automatic ETag & Commit SHA Verification
-    const commitCheck = await fetchLatestCommitSha(targets.commitApiUrl, localState.lastCommitETag);
+    const commitCheck = await fetchLatestCommitSha(targets.commitApiUrl, localState.lastCommitETag, targets.githubToken);
 
     if (!options.isManual && commitCheck.unmodified) {
       const nowIso = new Date().toISOString();
@@ -147,6 +157,10 @@ async function executeSync(options = { isManual: false }) {
 
     // 2. Download raw HTML bookmark content
     const headers = {};
+    if (targets.githubToken) {
+      headers['Authorization'] = `Bearer ${targets.githubToken}`;
+      headers['Accept'] = 'application/vnd.github.raw+json';
+    }
     if (!options.isManual && localState.lastETag) {
       headers['If-None-Match'] = localState.lastETag;
     }
@@ -165,6 +179,13 @@ async function executeSync(options = { isManual: false }) {
     }
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('GitHub authentication failed (HTTP 401). Please check your Personal Access Token in Options.');
+      } else if (response.status === 404) {
+        throw new Error(targets.githubToken
+          ? 'Repository or file not found (HTTP 404). Verify your repo name, file path, and token permissions.'
+          : 'Repository or file not found (HTTP 404). If the repository is private, configure a GitHub Personal Access Token in Options.');
+      }
       throw new Error(`HTTP Error ${response.status}: ${response.statusText} (${targets.rawUrl})`);
     }
 

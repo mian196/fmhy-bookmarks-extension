@@ -13,6 +13,10 @@ const strategyRadios = document.getElementsByName('strategy');
 const panelCustomFork = document.getElementById('panel-custom-fork');
 const forkRepoInput = document.getElementById('fork-repo');
 const customFilePathInput = document.getElementById('custom-file-path');
+const githubTokenInput = document.getElementById('github-token');
+const btnToggleToken = document.getElementById('btn-toggle-token');
+const iconTokenEye = document.getElementById('icon-token-eye');
+const iconTokenEyeOff = document.getElementById('icon-token-eye-off');
 
 const previewModeBadge = document.getElementById('preview-mode-badge');
 const previewTargetRepo = document.getElementById('preview-target-repo');
@@ -29,6 +33,7 @@ const DEFAULT_SETTINGS = {
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
   customFilePath: '',
+  githubToken: '',
   notifyOnSync: false,
   theme: 'dark'
 };
@@ -49,7 +54,7 @@ function formatTimeAgo(isoString) {
 /**
  * Fetch latest commit info from GitHub API
  */
-async function fetchLatestCommitInfo(repoPath = 'fmhy/bookmarks') {
+async function fetchLatestCommitInfo(repoPath = 'fmhy/bookmarks', token = '') {
   try {
     previewCommitSha.textContent = 'Checking GitHub API...';
     const cleanRepo = repoPath.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
@@ -58,7 +63,11 @@ async function fetchLatestCommitInfo(repoPath = 'fmhy/bookmarks') {
     previewTargetRepo.textContent = targetRepo;
 
     const apiUrl = `https://api.github.com/repos/${targetRepo}/commits?sha=main&per_page=1`;
-    const res = await fetch(apiUrl);
+    const headers = { 'Cache-Control': 'no-cache' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const res = await fetch(apiUrl, { headers });
     if (res.ok) {
       const data = await res.json();
       if (data && data[0]) {
@@ -68,6 +77,12 @@ async function fetchLatestCommitInfo(repoPath = 'fmhy/bookmarks') {
         previewCommitSha.textContent = `${sha} (${timeAgo})`;
         return;
       }
+    } else if (res.status === 404) {
+      previewCommitSha.textContent = token ? 'Not Found / Verify Scope' : 'Private Repo / Token Needed';
+      return;
+    } else if (res.status === 401) {
+      previewCommitSha.textContent = 'Invalid / Expired Token';
+      return;
     }
     previewCommitSha.textContent = 'Unavailable';
   } catch (e) {
@@ -85,7 +100,8 @@ function updateDynamicPanels() {
     panelCustomFork.classList.remove('hidden');
     previewModeBadge.textContent = 'Personal Fork';
     const repo = forkRepoInput.value.trim() || 'yourusername/fmhy-bookmarks';
-    fetchLatestCommitInfo(repo);
+    const token = githubTokenInput ? githubTokenInput.value.trim() : '';
+    fetchLatestCommitInfo(repo, token);
   } else {
     panelCustomFork.classList.add('hidden');
     previewModeBadge.textContent = 'Official FMHY';
@@ -145,6 +161,9 @@ async function loadSettings() {
 
   forkRepoInput.value = settings.forkRepo || '';
   customFilePathInput.value = settings.customFilePath || '';
+  if (githubTokenInput) {
+    githubTokenInput.value = settings.githubToken || '';
+  }
   notifySyncCheckbox.checked = !!settings.notifyOnSync;
 
   updateDynamicPanels();
@@ -211,6 +230,7 @@ async function saveSettings() {
       strategy: selectedStrategy,
       forkRepo: forkRepoInput.value.trim(),
       customFilePath: customFilePathInput.value.trim(),
+      githubToken: githubTokenInput ? githubTokenInput.value.trim() : '',
       notifyOnSync: notifySyncCheckbox.checked
     };
 
@@ -279,6 +299,23 @@ for (const radio of strategyRadios) {
 }
 
 forkRepoInput.addEventListener('blur', updateDynamicPanels);
+if (customFilePathInput) {
+  customFilePathInput.addEventListener('blur', updateDynamicPanels);
+}
+if (githubTokenInput) {
+  githubTokenInput.addEventListener('blur', updateDynamicPanels);
+}
+
+if (btnToggleToken && githubTokenInput) {
+  btnToggleToken.addEventListener('click', () => {
+    const isPassword = (githubTokenInput.type === 'password');
+    githubTokenInput.type = isPassword ? 'text' : 'password';
+    if (iconTokenEye && iconTokenEyeOff) {
+      iconTokenEye.classList.toggle('hidden', isPassword);
+      iconTokenEyeOff.classList.toggle('hidden', !isPassword);
+    }
+  });
+}
 
 const cardLocationMenu = document.getElementById('card-location-menu');
 if (cardLocationMenu) {
