@@ -18,7 +18,7 @@
 
 ## 🌟 Overview
 
-**FMHY Bookmarks Auto-Sync** is a lightweight, zero-dependency browser extension built for Chrome, Edge, Brave, and Firefox. It monitors the official [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) repository (or your personal GitHub fork) and automatically updates your browser's Bookmarks Bar whenever a new release commit lands on GitHub.
+**FMHY Bookmarks Auto-Sync** is a lightweight, zero-dependency browser extension built for desktop browsers (Chrome, Edge, Brave, Opera, and Firefox). It monitors the official [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) repository (or your personal GitHub fork) and automatically updates your browser's Bookmarks Bar whenever a new release commit lands on GitHub.
 
 - **Never miss updated links**: Keeps your local browser bookmarks in lockstep with weekly FMHY releases.
 - **Top of the Bookmarks Bar**: Automatically places the `FMHY` bookmarks folder at **Index 0** on your Bookmarks Bar for instant 1-click access.

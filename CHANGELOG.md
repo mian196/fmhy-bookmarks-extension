@@ -74,7 +74,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated preset labels and descriptions in options page and README documentation to accurately reflect ~25,000+ total links (`Full Collection`) and clarified Starred-Only collection (`Starred Only`).
 
 ### Fixed
-- Updated Firefox `strict_min_version` to `142.0` in `platform/firefox/manifest.json` to resolve Mozilla AMO validator warning regarding `data_collection_permissions` support on Firefox for Android.
+- Updated Firefox `strict_min_version` to `142.0` in `platform/firefox/manifest.json` to resolve Mozilla AMO validator warning regarding `data_collection_permissions` support.
 - Fixed Chrome desktop notification image loading error (`Unable to download all specified images`) in `service_worker.js` by correcting `iconUrl` path to `assets/icons/icon-48.png` and wrapping notification calls in Promise rejection handling.
 - Fixed notification setting bypass where manual syncs or installation events triggered desktop notifications even when `notifyOnSync` was disabled in extension settings.
 
