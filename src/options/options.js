@@ -9,6 +9,7 @@
 const presetRadios = document.getElementsByName('preset');
 const syncLocationRadios = document.getElementsByName('syncLocation');
 const strategyRadios = document.getElementsByName('strategy');
+const themeRadios = document.getElementsByName('theme');
 
 const panelCustomFork = document.getElementById('panel-custom-fork');
 const forkRepoInput = document.getElementById('fork-repo');
@@ -35,8 +36,29 @@ const DEFAULT_SETTINGS = {
   customFilePath: '',
   githubToken: '',
   notifyOnSync: false,
-  theme: 'dark'
+  theme: 'system' // 'system' | 'light' | 'dark'
 };
+
+let currentThemeSetting = 'system';
+
+/**
+ * Resolve effective theme (light or dark) based on setting
+ */
+function resolveTheme(setting) {
+  if (setting === 'system') {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  return setting === 'dark' ? 'dark' : 'light';
+}
+
+/**
+ * Apply Theme Mode (System, Light, or Dark)
+ */
+function applyTheme(themeSetting) {
+  currentThemeSetting = themeSetting || 'system';
+  const effectiveTheme = resolveTheme(currentThemeSetting);
+  document.documentElement.setAttribute('data-theme', effectiveTheme);
+}
 
 /**
  * Format ISO time to relative string
@@ -115,9 +137,8 @@ function updateDynamicPanels() {
 async function loadSettings() {
   const settings = await api.storage.sync.get(DEFAULT_SETTINGS);
 
-  if (settings.theme) {
-    document.documentElement.setAttribute('data-theme', settings.theme);
-  }
+  const selectedTheme = settings.theme || 'system';
+  applyTheme(selectedTheme);
 
   const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
   const cardLocationMenu = document.getElementById('card-location-menu');
@@ -157,6 +178,10 @@ async function loadSettings() {
 
   for (const radio of strategyRadios) {
     radio.checked = (radio.value === (settings.strategy || 'official'));
+  }
+
+  for (const radio of themeRadios) {
+    radio.checked = (radio.value === selectedTheme);
   }
 
   forkRepoInput.value = settings.forkRepo || '';
@@ -208,6 +233,7 @@ async function saveSettings() {
   const selectedPreset = Array.from(presetRadios).find(r => r.checked)?.value || 'full';
   const selectedSyncLocation = Array.from(syncLocationRadios).find(r => r.checked)?.value || 'toolbar';
   const selectedStrategy = Array.from(strategyRadios).find(r => r.checked)?.value || 'official';
+  const selectedTheme = Array.from(themeRadios).find(r => r.checked)?.value || 'system';
 
   if (selectedStrategy === 'custom_fork' && !forkRepoInput.value.trim()) {
     showToast('Error: Please enter a valid GitHub repository (owner/repo).');
@@ -231,7 +257,8 @@ async function saveSettings() {
       forkRepo: forkRepoInput.value.trim(),
       customFilePath: customFilePathInput.value.trim(),
       githubToken: githubTokenInput ? githubTokenInput.value.trim() : '',
-      notifyOnSync: notifySyncCheckbox.checked
+      notifyOnSync: notifySyncCheckbox.checked,
+      theme: selectedTheme
     };
 
     await api.storage.sync.set(newSettings);
@@ -297,6 +324,13 @@ for (const radio of syncLocationRadios) {
 for (const radio of strategyRadios) {
   radio.addEventListener('change', updateDynamicPanels);
 }
+for (const radio of themeRadios) {
+  radio.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      applyTheme(e.target.value);
+    }
+  });
+}
 
 forkRepoInput.addEventListener('blur', updateDynamicPanels);
 if (customFilePathInput) {
@@ -324,6 +358,29 @@ if (cardLocationMenu) {
     if (!isFirefox) {
       e.preventDefault();
       showToast('⚠️ Bookmarks Menu is exclusive to Firefox. Please select Bookmarks Bar or Other Bookmarks on Chrome.');
+    }
+  });
+}
+
+// Listen to OS theme changes if set to system
+const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+if (mediaQuery.addEventListener) {
+  mediaQuery.addEventListener('change', () => {
+    if (currentThemeSetting === 'system') {
+      applyTheme('system');
+    }
+  });
+}
+
+// Listen to storage changes across pages
+if (api.storage && api.storage.onChanged) {
+  api.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.theme) {
+      const newTheme = changes.theme.newValue || 'system';
+      applyTheme(newTheme);
+      for (const radio of themeRadios) {
+        radio.checked = (radio.value === newTheme);
+      }
     }
   });
 }

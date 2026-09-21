@@ -31,7 +31,7 @@
 
 - ⚡ **Automated GitHub Commit Tracking**: Automatically monitors GitHub for new commits on browser startup and via 6-hour periodic alarms, updating bookmarks when upstream changes occur.
 - 🔄 **Manual "Sync Now" Trigger**: Clicking **Sync Now** in the extension dashboard manually triggers an instant download and fresh bookmark tree synchronization on demand.
-- 🎨 **Apple Minimalist UI**: Clean Light & Dark Mode theme switcher, real-time commit telemetry, and custom vector icons.
+- 🎨 **Apple Minimalist UI**: System Default (Auto), Light & Dark Mode theme switcher, real-time commit telemetry, and custom vector icons.
 - ⚙️ **2-Strategy Target Selector**:
   - **Official FMHY Repository** (`fmhy/bookmarks`) — Track official community releases.
   - **Personal Fork Repository** — Track your custom personal GitHub fork and workflow runs (supports both public and private repos via optional GitHub PAT).

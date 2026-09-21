@@ -17,7 +17,7 @@
         <img src="../assets/logo.svg" width="52" height="52" alt="FMHY Logo" class="brand-icon">
         <div>
           <h1>FMHY Auto-Sync Preferences</h1>
-          <p class="subtitle">Configure bookmark directory, source repository, and desktop notifications.</p>
+          <p class="subtitle">Configure bookmark collection, sync location, source repository, and appearance.</p>
         </div>
       </div>
     </header>
@@ -201,6 +201,50 @@
             <label class="checkbox-label">
               <input type="checkbox" id="notify-sync">
               <span>Show desktop notification when background sync updates bookmarks</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Theme & Appearance -->
+      <section class="card">
+        <div class="card-header">
+          <h2>4. Appearance & Theme</h2>
+          <p>Choose your preferred interface theme or follow your operating system appearance.</p>
+        </div>
+        <div class="card-body">
+          <div class="radio-group">
+            <label class="radio-card">
+              <input type="radio" name="theme" value="system" checked>
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">System Default</span>
+                  <span class="badge badge-cyan">Auto / OS</span>
+                </div>
+                <span class="radio-desc">Automatically synchronizes with your operating system light / dark mode preference.</span>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="theme" value="light">
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Light Mode</span>
+                  <span class="badge badge-amber">Light</span>
+                </div>
+                <span class="radio-desc">Crisp Apple-inspired minimalist light appearance.</span>
+              </div>
+            </label>
+
+            <label class="radio-card">
+              <input type="radio" name="theme" value="dark">
+              <div class="radio-content">
+                <div class="radio-header">
+                  <span class="radio-title">Dark Mode</span>
+                  <span class="badge badge-purple">Dark</span>
+                </div>
+                <span class="radio-desc">Sleek dark appearance optimized for low-light environments and OLED displays.</span>
+              </div>
             </label>
           </div>
         </div>

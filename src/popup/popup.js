@@ -15,45 +15,87 @@ const btnSyncText = document.getElementById('btn-sync-text');
 const syncIcon = document.getElementById('sync-icon');
 
 const btnThemeToggle = document.getElementById('btn-theme-toggle');
+const themeIconSystem = document.getElementById('theme-icon-system');
 const themeIconSun = document.getElementById('theme-icon-sun');
 const themeIconMoon = document.getElementById('theme-icon-moon');
 
 const btnOptions = document.getElementById('btn-options');
 const btnClearCache = document.getElementById('btn-clear-cache');
 
-let currentTheme = 'light';
+let currentThemeSetting = 'system';
 
 /**
- * Apply Theme Mode (Light or Dark)
+ * Resolve effective theme (light or dark) based on setting
  */
-function applyTheme(theme) {
-  currentTheme = theme;
-  document.documentElement.setAttribute('data-theme', theme);
+function resolveTheme(setting) {
+  if (setting === 'system') {
+    return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+  return setting === 'dark' ? 'dark' : 'light';
+}
 
-  if (theme === 'dark') {
-    themeIconSun.classList.remove('hidden');
-    themeIconMoon.classList.add('hidden');
-  } else {
-    themeIconMoon.classList.remove('hidden');
-    themeIconSun.classList.add('hidden');
+/**
+ * Apply Theme Mode (System, Light, or Dark)
+ */
+function applyTheme(themeSetting) {
+  currentThemeSetting = themeSetting || 'system';
+  const effectiveTheme = resolveTheme(currentThemeSetting);
+  document.documentElement.setAttribute('data-theme', effectiveTheme);
+
+  if (themeIconSystem) themeIconSystem.classList.toggle('hidden', currentThemeSetting !== 'system');
+  if (themeIconSun) themeIconSun.classList.toggle('hidden', currentThemeSetting !== 'light');
+  if (themeIconMoon) themeIconMoon.classList.toggle('hidden', currentThemeSetting !== 'dark');
+
+  if (btnThemeToggle) {
+    let label = 'Theme: System Default';
+    if (currentThemeSetting === 'light') label = 'Theme: Light Mode';
+    if (currentThemeSetting === 'dark') label = 'Theme: Dark Mode';
+    btnThemeToggle.title = label;
+    btnThemeToggle.setAttribute('aria-label', label);
   }
 }
 
 /**
- * Initialize Theme from Storage
+ * Initialize Theme from Storage and setup listeners
  */
 async function initTheme() {
-  const data = await api.storage.sync.get({ theme: 'light' });
+  const data = await api.storage.sync.get({ theme: 'system' });
   applyTheme(data.theme);
+
+  // Listen to OS theme changes if set to system
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mediaQuery.addEventListener) {
+    mediaQuery.addEventListener('change', () => {
+      if (currentThemeSetting === 'system') {
+        applyTheme('system');
+      }
+    });
+  }
+
+  // Listen to storage changes across pages
+  if (api.storage && api.storage.onChanged) {
+    api.storage.onChanged.addListener((changes, area) => {
+      if (area === 'sync' && changes.theme) {
+        applyTheme(changes.theme.newValue || 'system');
+      }
+    });
+  }
 }
 
 /**
- * Toggle Theme Mode
+ * Toggle Theme Mode: system -> light -> dark -> system
  */
 async function toggleTheme() {
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  applyTheme(newTheme);
-  await api.storage.sync.set({ theme: newTheme });
+  let nextTheme = 'system';
+  if (currentThemeSetting === 'system') {
+    nextTheme = 'light';
+  } else if (currentThemeSetting === 'light') {
+    nextTheme = 'dark';
+  } else {
+    nextTheme = 'system';
+  }
+  applyTheme(nextTheme);
+  await api.storage.sync.set({ theme: nextTheme });
 }
 
 /**

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 🎨 **System Default Theme Option**: Added support for a System Default (Auto) theme mode across the extension popup and options preferences. The extension now synchronizes automatically with the operating system's dark/light mode preference (`prefers-color-scheme`), with dynamic real-time theme changes and cross-page storage synchronization.
 - 🔑 **Private Repository Support (GitHub PAT Authentication)**: Added optional GitHub Personal Access Token (PAT) authentication under the Personal Fork strategy. Enables automated synchronization from private repositories via GitHub's raw contents API and elevates rate limits to 5,000 requests/hour.
 
 ---
