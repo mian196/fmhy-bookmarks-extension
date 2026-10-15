@@ -478,6 +478,13 @@ api.runtime.onInstalled.addListener(async (details) => {
     executeSync({ isManual: true });
   } else if (details.reason === 'update') {
     await updateAlarmSchedule();
+    // Invalidate commit cache on extension update so that empty folder pruning takes effect on next sync
+    await api.storage.local.set({
+      lastETag: null,
+      lastCommitSha: null,
+      lastCommitETag: null
+    });
+    executeSync({ isManual: true });
   }
 });
 

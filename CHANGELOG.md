@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - 🔗 **Browser URL Canonicalization Diff Churn**: Implemented `normalizeBookmarkUrl` in `bookmark_sync.js` to normalize origin URLs (handling trailing slashes). This eliminates recurring false diff churn where 357 domain-root bookmarks were repeatedly reported as `+357 added, -357 removed` on every run due to browser bookmark storage automatically appending trailing slashes to origin URLs.
+- 📁 **Empty Folder Pruning (Starred & Category Sync)**: Added recursive empty folder pruning (`pruneEmptyFolders`) in `html_parser.js` and `bookmark_sync.js`. Folders and subcategories with zero bookmark links in their subtree (such as empty subfolders like `Anime Streaming Apps` or empty section markers in the starred preset) are automatically excluded from the bookmark tree and pruned from existing browser bookmarks during synchronization.
 
 ---
 

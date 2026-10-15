@@ -383,6 +383,11 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes, stats = null) {
   const folderTasks = [];
 
   for (const folderNode of incomingFolders) {
+    // Skip empty folders (0 bookmark links in subtree)
+    if (countLinksInTree(folderNode) === 0) {
+      continue;
+    }
+
     const titleKey = (folderNode.title || '').trim();
     const existingList = existingFoldersByTitle.get(titleKey);
 
@@ -442,6 +447,43 @@ async function buildBookmarkSubtree(parentId, childrenNodes) {
 }
 
 /**
+ * Prunes empty folders from a bookmark tree (fallback if html_parser.js is not loaded).
+ * @param {Object} node - Root bookmark tree node
+ * @returns {Object} Pruned tree node
+ */
+function pruneTreeFolders(node) {
+  if (typeof pruneEmptyFolders === 'function') {
+    return pruneEmptyFolders(node);
+  }
+  if (!node) return node;
+  if (!node.isFolder) return node;
+
+  function pruneNode(n) {
+    if (!n || !n.isFolder) return n;
+    const children = [];
+    if (Array.isArray(n.children)) {
+      for (const child of n.children) {
+        const pruned = pruneNode(child);
+        if (pruned !== null) {
+          children.push(pruned);
+        }
+      }
+    }
+    if (children.length === 0) return null;
+    return { ...n, children };
+  }
+
+  const prunedChildren = [];
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const p = pruneNode(child);
+      if (p !== null) prunedChildren.push(p);
+    }
+  }
+  return { ...node, children: prunedChildren };
+}
+
+/**
  * Performs incremental diffing sync of FMHY bookmark tree to the selected target container
  * @param {Object} parsedTree - Parsed FMHY tree root from html_parser
  * @param {string} [syncLocation='toolbar'] - Target location ('toolbar' | 'other' | 'menu')
@@ -451,8 +493,11 @@ async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
   try {
     const targetParentId = await resolveTargetParentId(syncLocation);
 
+    // Prune any empty folders from the tree before syncing
+    const cleanTree = pruneTreeFolders(parsedTree);
+
     // 1. Prepare FMHY Root Folder in-place at target container
-    const fmhyRoot = await prepareFMHYRootFolder(targetParentId, parsedTree.title || 'FMHY');
+    const fmhyRoot = await prepareFMHYRootFolder(targetParentId, cleanTree.title || 'FMHY');
 
     const stats = {
       total: 0,
@@ -462,7 +507,7 @@ async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
     };
 
     // 2. Perform incremental diffing sync under FMHY root
-    await reconcileBookmarkSubtree(fmhyRoot.id, parsedTree.children, stats);
+    await reconcileBookmarkSubtree(fmhyRoot.id, cleanTree.children, stats);
 
     return {
       success: true,
@@ -500,7 +545,9 @@ function filterBookmarkTreeByCategories(parsedTree, selectedCategories) {
   }
 
   if (!selectedCategories || !Array.isArray(selectedCategories) || selectedCategories.length === 0) {
-    return parsedTree;
+    const cleanTree = pruneTreeFolders(parsedTree);
+    cleanTree.totalBookmarks = countLinksInTree(cleanTree);
+    return cleanTree;
   }
 
   const selectedSet = new Set(selectedCategories.map((c) => String(c).toLowerCase().trim()));
@@ -519,8 +566,9 @@ function filterBookmarkTreeByCategories(parsedTree, selectedCategories) {
     children: filteredChildren
   };
 
-  filteredTree.totalBookmarks = countLinksInTree(filteredTree);
-  return filteredTree;
+  const cleanTree = pruneTreeFolders(filteredTree);
+  cleanTree.totalBookmarks = countLinksInTree(cleanTree);
+  return cleanTree;
 }
 
 if (typeof self !== 'undefined') {
@@ -534,6 +582,7 @@ if (typeof self !== 'undefined') {
   self.countLinksInTree = countLinksInTree;
   self.normalizeBookmarkUrl = normalizeBookmarkUrl;
   self.filterBookmarkTreeByCategories = filterBookmarkTreeByCategories;
+  self.pruneTreeFolders = pruneTreeFolders;
 }
 
 

@@ -91,8 +91,9 @@ function parseBookmarkHTML(htmlString) {
   }
 
   const unwrappedRoot = unwrapRoot(rootNode);
-  unwrappedRoot.totalBookmarks = bookmarkCount;
-  return unwrappedRoot;
+  const prunedRoot = pruneEmptyFolders(unwrappedRoot);
+  prunedRoot.totalBookmarks = bookmarkCount;
+  return prunedRoot;
 }
 
 /**
@@ -117,7 +118,68 @@ function unwrapRoot(rootNode) {
   };
 }
 
+/**
+ * Recursively removes empty folders from a bookmark tree node.
+ * A folder node is considered empty if it contains 0 link bookmarks in its entire subtree.
+ * Non-folder nodes (links) are preserved.
+ *
+ * @param {Object} node - Bookmark tree node
+ * @returns {Object|null} Pruned bookmark node, or null if empty folder
+ */
+function pruneEmptyFolderNode(node) {
+  if (!node) return null;
+  if (!node.isFolder) return node;
+
+  const prunedChildren = [];
+  if (Array.isArray(node.children)) {
+    for (const child of node.children) {
+      const prunedChild = pruneEmptyFolderNode(child);
+      if (prunedChild !== null) {
+        prunedChildren.push(prunedChild);
+      }
+    }
+  }
+
+  // Folder with 0 links or subfolders after pruning
+  if (prunedChildren.length === 0) {
+    return null;
+  }
+
+  return {
+    ...node,
+    children: prunedChildren
+  };
+}
+
+/**
+ * Prunes empty folders from a root bookmark tree.
+ * Preserves the root node itself while removing all empty descendant folders.
+ *
+ * @param {Object} rootNode - Root bookmark tree node
+ * @returns {Object} Pruned tree with empty folders removed
+ */
+function pruneEmptyFolders(rootNode) {
+  if (!rootNode) return rootNode;
+
+  const prunedChildren = [];
+  if (Array.isArray(rootNode.children)) {
+    for (const child of rootNode.children) {
+      const prunedChild = pruneEmptyFolderNode(child);
+      if (prunedChild !== null) {
+        prunedChildren.push(prunedChild);
+      }
+    }
+  }
+
+  return {
+    ...rootNode,
+    children: prunedChildren
+  };
+}
+
 if (typeof self !== 'undefined') {
   self.decodeHTMLEntities = decodeHTMLEntities;
   self.parseBookmarkHTML = parseBookmarkHTML;
+  self.pruneEmptyFolders = pruneEmptyFolders;
+  self.pruneEmptyFolderNode = pruneEmptyFolderNode;
 }
