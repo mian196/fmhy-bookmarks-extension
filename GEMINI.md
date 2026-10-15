@@ -66,12 +66,3 @@ This document outlines the coding standards, workflow conventions, architectural
 * **Bundled Local Assets**: All icons, logos, and UI images must be bundled locally inside `src/assets/`.
 * **No Remote Image Fetching**: Do not reference external image URLs (e.g. `raw.githubusercontent.com`) inside extension HTML/CSS/JS files.
 
----
-
-## 🎯 7. Zero-Modification Upstream Passthrough Policy
-
-* **Scope Boundary**: The sole mandate of this extension is to automate the delivery and synchronization pipeline between the upstream repository (`fmhy/bookmarks`) and the user's browser bookmarks bar.
-* **Strictly Unmodified Category Content**: Never add features or logic that sort (e.g. alphabetical), mutate, rename, or restructure bookmark entries or subfolder hierarchies within synced categories. Links and subfolders must be injected into the browser **exactly as authored upstream**.
-* **Selective Category Synchronization**: Users may optionally choose which top-level categories (e.g., Video, Privacy, Gaming) to mirror to prevent bookmarks bar bloat. Any unselected categories are omitted at the top level without modifying the internal contents of the selected categories.
-* **Issue & PR Scope**: Only issues/PRs directly related to the extension's execution lifecycle (sync engine, background workers, browser APIs, options UI, alarms, rate limits) or top-level synchronization filters are in scope. All bookmark content modifications or hierarchy restructuring requests within categories must be declined and referred upstream to `fmhy/bookmarks` (or to personal user forks).
-
