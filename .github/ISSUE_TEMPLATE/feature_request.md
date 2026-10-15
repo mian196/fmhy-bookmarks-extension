@@ -3,7 +3,7 @@ name: ✨ Feature Request
 about: Suggest an idea or enhancement for FMHY Bookmarks Auto-Sync
 title: '[FEATURE] '
 labels: 'enhancement'
-assignees: ''
+assignees: 'mian196'
 ---
 
 ## 💡 Is your feature request related to a problem?
