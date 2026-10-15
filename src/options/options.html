@@ -53,10 +53,53 @@
         </div>
       </section>
 
-      <!-- Section 2: Bookmark Target Location -->
+      <!-- Section 2: Category Filter -->
+      <section class="card" id="card-categories">
+        <div class="card-header">
+          <div class="card-header-flex">
+            <div>
+              <h2>2. Category Filter (Selective Sync)</h2>
+              <p>Choose which categories to mirror into your browser. Only selected categories will be synced.</p>
+            </div>
+            <span class="badge badge-cyan" id="categories-summary-badge">All Categories</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="category-toolbar">
+            <div class="category-mode-toggle">
+              <label class="checkbox-pill">
+                <input type="checkbox" id="toggle-all-categories" checked>
+                <span class="checkbox-pill-text">Sync All Categories</span>
+              </label>
+            </div>
+            <div class="category-quick-actions">
+              <button type="button" id="btn-select-all-cats" class="btn-subtle-action">Select All</button>
+              <button type="button" id="btn-deselect-all-cats" class="btn-subtle-action">Deselect All</button>
+            </div>
+          </div>
+
+          <div class="category-search-wrapper">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="category-search-input" placeholder="Filter categories (e.g. video, privacy, gaming)..." class="category-search-input">
+          </div>
+
+          <div id="category-grid" class="category-grid">
+            <!-- Dynamically populated category checkboxes -->
+          </div>
+
+          <p class="form-hint" id="category-hint">
+            💡 Unchecking a category cleanly removes it from your browser bookmarks on the next sync without affecting others.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 3: Bookmark Target Location -->
       <section class="card">
         <div class="card-header">
-          <h2>2. Bookmark Sync Location</h2>
+          <h2>3. Bookmark Sync Location</h2>
           <p>Choose where the FMHY bookmark directory is placed inside your browser.</p>
         </div>
         <div class="card-body">
@@ -97,10 +140,10 @@
         </div>
       </section>
 
-      <!-- Section 3: Repository Target Strategy -->
+      <!-- Section 4: Repository Target Strategy -->
       <section class="card">
         <div class="card-header">
-          <h2>3. Sync Source Repository</h2>
+          <h2>4. Sync Source Repository</h2>
           <p>The extension monitors GitHub on startup and syncs whenever a new commit is detected.</p>
         </div>
 
@@ -203,10 +246,10 @@
         </div>
       </section>
 
-      <!-- Section 4: Theme & Appearance -->
+      <!-- Section 5: Theme & Appearance -->
       <section class="card">
         <div class="card-header">
-          <h2>4. Appearance & Theme</h2>
+          <h2>5. Appearance & Theme</h2>
           <p>Choose your preferred interface theme or follow your operating system appearance.</p>
         </div>
         <div class="card-body">

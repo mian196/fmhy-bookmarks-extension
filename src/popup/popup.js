@@ -125,7 +125,8 @@ function formatTime(isoString) {
  */
 async function updateUI() {
   const syncSettings = await api.storage.sync.get({
-    preset: 'full'
+    preset: 'full',
+    selectedCategories: []
   });
 
   const localData = await api.storage.local.get([
@@ -136,10 +137,11 @@ async function updateUI() {
   ]);
 
   // Update Preset Badge
+  const hasCustomCategories = Array.isArray(syncSettings.selectedCategories) && syncSettings.selectedCategories.length > 0;
   if (syncSettings.preset === 'starred') {
-    presetPill.textContent = 'Starred Only';
+    presetPill.textContent = hasCustomCategories ? `Starred (${syncSettings.selectedCategories.length} cats)` : 'Starred Only';
   } else {
-    presetPill.textContent = 'Full Directory';
+    presetPill.textContent = hasCustomCategories ? `Full (${syncSettings.selectedCategories.length} cats)` : 'Full Directory';
   }
 
   const status = localData.lastSyncStatus || 'idle';

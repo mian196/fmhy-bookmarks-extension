@@ -486,6 +486,43 @@ async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
   }
 }
 
+/**
+ * Filters parsed bookmark tree to only include selected top-level categories.
+ * If selectedCategories is empty or null, returns the original parsedTree untouched.
+ *
+ * @param {Object} parsedTree - Parsed bookmark root tree
+ * @param {Array<string>} selectedCategories - Array of category folder titles to include
+ * @returns {Object} Filtered bookmark tree
+ */
+function filterBookmarkTreeByCategories(parsedTree, selectedCategories) {
+  if (!parsedTree || !Array.isArray(parsedTree.children)) {
+    return parsedTree;
+  }
+
+  if (!selectedCategories || !Array.isArray(selectedCategories) || selectedCategories.length === 0) {
+    return parsedTree;
+  }
+
+  const selectedSet = new Set(selectedCategories.map((c) => String(c).toLowerCase().trim()));
+
+  const filteredChildren = parsedTree.children.filter((child) => {
+    // Preserve non-folder nodes if any exist at the root
+    if (!child.isFolder) {
+      return true;
+    }
+    const titleKey = String(child.title || '').toLowerCase().trim();
+    return selectedSet.has(titleKey);
+  });
+
+  const filteredTree = {
+    ...parsedTree,
+    children: filteredChildren
+  };
+
+  filteredTree.totalBookmarks = countLinksInTree(filteredTree);
+  return filteredTree;
+}
+
 if (typeof self !== 'undefined') {
   self.findBookmarksBarId = findBookmarksBarId;
   self.resolveTargetParentId = resolveTargetParentId;
@@ -496,6 +533,7 @@ if (typeof self !== 'undefined') {
   self.syncFMHYBookmarks = syncFMHYBookmarks;
   self.countLinksInTree = countLinksInTree;
   self.normalizeBookmarkUrl = normalizeBookmarkUrl;
+  self.filterBookmarkTreeByCategories = filterBookmarkTreeByCategories;
 }
 
 

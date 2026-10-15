@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 🗂️ **Selective Category-Wise Sync**: Added an opt-in Category Filter section in Options (`options.html`) allowing users to choose exactly which top-level categories (e.g., Video, Privacy, Gaming, Audio) to mirror into their browser bookmarks bar. Eliminates bookmarks bar bloat by selectively syncing only desired categories (e.g., syncing ~2.2k bookmarks instead of the entire ~26k collection).
+- 🏷️ **Dynamic Category Metadata & Link Counts**: Dynamically extracts top-level categories and calculates exact bookmark counts per category during synchronization, displaying estimated counts and curated descriptions in the Options UI with live search filtering and quick "Select All" / "Deselect All" controls.
+- 🧹 **Automatic Obsolete Category Pruning**: Category selections integrate directly with the incremental diffing engine (`bookmark_sync.js`). Deselected categories are cleanly pruned from the browser's bookmarks bar on the next sync, while newly selected categories are added seamlessly.
 - 🔔 **Delta-Based Sync Notifications**: Updated desktop notifications and popup status banners to report actual bookmark changes (`+X added, -Y removed`) on subsequent sync runs instead of repeatedly displaying the full collection count (~26k), while retaining the total link count for initial syncs.
 - 📊 **Bookmark Diff Statistics Tracking**: Enhanced `reconcileBookmarkSubtree` and `syncFMHYBookmarks` in `bookmark_sync.js` to accurately aggregate active additions, deletions (including links within pruned obsolete folders), and title updates across all folder subtrees.
 

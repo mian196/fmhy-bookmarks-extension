@@ -28,6 +28,41 @@ const btnSave = document.getElementById('btn-save');
 const btnReset = document.getElementById('btn-reset');
 const toast = document.getElementById('toast');
 
+const categoriesSummaryBadge = document.getElementById('categories-summary-badge');
+const toggleAllCategories = document.getElementById('toggle-all-categories');
+const btnSelectAllCats = document.getElementById('btn-select-all-cats');
+const btnDeselectAllCats = document.getElementById('btn-deselect-all-cats');
+const categorySearchInput = document.getElementById('category-search-input');
+const categoryGrid = document.getElementById('category-grid');
+
+const FMHY_CATEGORY_META = {
+  'video': { label: 'Video', desc: 'Streaming, Movies, TV, Anime, Sports' },
+  'ai': { label: 'Artificial Intelligence', desc: 'LLMs, AI Tools, Models, Prompts' },
+  'mobile': { label: 'Mobile', desc: 'Android, iOS, Apps, APKs' },
+  'audio': { label: 'Audio', desc: 'Music Streaming, Podcasts, Radio, Production' },
+  'downloading': { label: 'Downloading', desc: 'Debrid, Direct Download, Web Downloaders' },
+  'educational': { label: 'Educational', desc: 'Courses, Textbooks, Science, Tutorials' },
+  'gaming': { label: 'Gaming', desc: 'PC, Emulation, ROMs, Repacks' },
+  'privacy': { label: 'Privacy & Security', desc: 'Anti-Censorship, VPNs, Adblocking, DNS' },
+  'system-tools': { label: 'System Tools', desc: 'Windows, Tweaks, Activators, Optimization' },
+  'file-tools': { label: 'File Tools', desc: 'File Sharing, Compression, Converters' },
+  'internet-tools': { label: 'Internet Tools', desc: 'Browsers, Extensions, Search Engines' },
+  'social-media-tools': { label: 'Social Media Tools', desc: 'Discord, Reddit, YouTube, Automation' },
+  'text-tools': { label: 'Text Tools', desc: 'Writers, OCR, Translators, Office Suites' },
+  'video-tools': { label: 'Video Tools', desc: 'Video Editors, Transcoders, Screen Recorders' },
+  'misc': { label: 'Miscellaneous', desc: 'Useful Web Apps, Fun Sites, Utilities' },
+  'reading': { label: 'Reading', desc: 'Books, Manga, Comics, Magazines, News' },
+  'torrenting': { label: 'Torrenting', desc: 'Trackers, Clients, Port Forwarding' },
+  'image-tools': { label: 'Image Tools', desc: 'Editors, Upscalers, Photo Enhancers' },
+  'gaming-tools': { label: 'Gaming Tools', desc: 'Modding, Game Fixes, Trackers' },
+  'linux-macos': { label: 'Linux & macOS', desc: 'Distros, FOSS Apps, Mac Software' },
+  'developer-tools': { label: 'Developer Tools', desc: 'Hosting, Git, APIs, Code Editors' },
+  'non-english': { label: 'Non-English', desc: 'International & Regional Resources' },
+  'storage': { label: 'Storage', desc: 'Cloud Storage, Free Web Drives' }
+};
+
+const DEFAULT_CATEGORY_KEYS = Object.keys(FMHY_CATEGORY_META);
+
 const DEFAULT_SETTINGS = {
   preset: 'full',
   syncLocation: 'toolbar', // 'toolbar' | 'other' | 'menu'
@@ -36,10 +71,189 @@ const DEFAULT_SETTINGS = {
   customFilePath: '',
   githubToken: '',
   notifyOnSync: false,
-  theme: 'system' // 'system' | 'light' | 'dark'
+  theme: 'system', // 'system' | 'light' | 'dark'
+  selectedCategories: [] // [] = All categories
 };
 
 let currentThemeSetting = 'system';
+
+/**
+ * Format category label with human-friendly title
+ */
+function formatCategoryLabel(rawKey) {
+  const meta = FMHY_CATEGORY_META[String(rawKey).toLowerCase()];
+  if (meta && meta.label) {
+    return meta.label;
+  }
+  return String(rawKey)
+    .replace(/^►\s*|\s*◄$/g, '')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/**
+ * Format category description
+ */
+function formatCategoryDesc(rawKey) {
+  const meta = FMHY_CATEGORY_META[String(rawKey).toLowerCase()];
+  if (meta && meta.desc) {
+    return meta.desc;
+  }
+  return 'Curated links and bookmark resources';
+}
+
+/**
+ * Compares two category title arrays for set equality
+ */
+function areCategoryListsEqual(a, b) {
+  const arrA = Array.isArray(a) ? a : [];
+  const arrB = Array.isArray(b) ? b : [];
+  if (arrA.length !== arrB.length) return false;
+  const setA = new Set(arrA.map((x) => String(x).toLowerCase().trim()));
+  for (const item of arrB) {
+    if (!setA.has(String(item).toLowerCase().trim())) return false;
+  }
+  return true;
+}
+
+/**
+ * Renders category checkboxes dynamically into the grid
+ */
+function renderCategoryGrid(availableCategories, selectedCategories) {
+  if (!categoryGrid) return;
+  categoryGrid.innerHTML = '';
+
+  let items = [];
+  if (Array.isArray(availableCategories) && availableCategories.length > 0) {
+    items = availableCategories;
+  } else {
+    items = DEFAULT_CATEGORY_KEYS.map((key) => ({
+      title: key,
+      count: 0
+    }));
+  }
+
+  const isAllSelected = !Array.isArray(selectedCategories) || selectedCategories.length === 0;
+  const selectedSet = new Set(
+    (selectedCategories || []).map((c) => String(c).toLowerCase().trim())
+  );
+
+  items.forEach((cat) => {
+    const rawTitle = typeof cat === 'string' ? cat : cat.title;
+    const count = typeof cat === 'object' && cat.count ? cat.count : 0;
+    const titleKey = String(rawTitle).toLowerCase().trim();
+    const isChecked = isAllSelected || selectedSet.has(titleKey);
+
+    const labelEl = document.createElement('label');
+    labelEl.className = `category-item${isChecked ? ' selected' : ''}`;
+    labelEl.dataset.title = titleKey;
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'category-checkbox';
+    checkbox.value = rawTitle;
+    checkbox.checked = isChecked;
+
+    checkbox.addEventListener('change', () => {
+      labelEl.classList.toggle('selected', checkbox.checked);
+      updateCategorySelectionState();
+    });
+
+    const infoEl = document.createElement('div');
+    infoEl.className = 'category-info';
+
+    const titleRow = document.createElement('div');
+    titleRow.className = 'category-title-row';
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'category-title';
+    titleSpan.textContent = formatCategoryLabel(rawTitle);
+
+    titleRow.appendChild(titleSpan);
+
+    if (count > 0) {
+      const countSpan = document.createElement('span');
+      countSpan.className = 'category-count';
+      countSpan.textContent = `~${count.toLocaleString()}`;
+      titleRow.appendChild(countSpan);
+    }
+
+    const descSpan = document.createElement('span');
+    descSpan.className = 'category-desc';
+    descSpan.textContent = formatCategoryDesc(rawTitle);
+
+    infoEl.appendChild(titleRow);
+    infoEl.appendChild(descSpan);
+
+    labelEl.appendChild(checkbox);
+    labelEl.appendChild(infoEl);
+
+    categoryGrid.appendChild(labelEl);
+  });
+
+  updateCategorySelectionState();
+}
+
+/**
+ * Updates selection summary badge and master checkbox state
+ */
+function updateCategorySelectionState() {
+  if (!categoryGrid || !toggleAllCategories || !categoriesSummaryBadge) return;
+  const checkboxes = Array.from(categoryGrid.querySelectorAll('.category-checkbox'));
+  const total = checkboxes.length;
+  const checked = checkboxes.filter((cb) => cb.checked).length;
+
+  toggleAllCategories.checked = (total > 0 && checked === total);
+  toggleAllCategories.indeterminate = (checked > 0 && checked < total);
+
+  if (checked === total) {
+    categoriesSummaryBadge.className = 'badge badge-cyan';
+    categoriesSummaryBadge.textContent = `All ${total} Categories`;
+  } else if (checked === 0) {
+    categoriesSummaryBadge.className = 'badge badge-warning';
+    categoriesSummaryBadge.textContent = 'None Selected (Required)';
+  } else {
+    categoriesSummaryBadge.className = 'badge badge-purple';
+    categoriesSummaryBadge.textContent = `${checked} / ${total} Selected`;
+  }
+}
+
+/**
+ * Check or uncheck all category checkboxes in the grid
+ */
+function setAllCategoryCheckboxes(checked) {
+  if (!categoryGrid) return;
+  const checkboxes = categoryGrid.querySelectorAll('.category-checkbox');
+  checkboxes.forEach((cb) => {
+    cb.checked = checked;
+    const parentLabel = cb.closest('.category-item');
+    if (parentLabel) {
+      parentLabel.classList.toggle('selected', checked);
+    }
+  });
+  updateCategorySelectionState();
+}
+
+/**
+ * Filter visible categories based on search input
+ */
+function filterCategoriesInGrid(query) {
+  if (!categoryGrid) return;
+  const cleanQuery = (query || '').toLowerCase().trim();
+  const items = categoryGrid.querySelectorAll('.category-item');
+  items.forEach((item) => {
+    const titleKey = item.dataset.title || '';
+    const labelText = item.querySelector('.category-title')?.textContent?.toLowerCase() || '';
+    const descText = item.querySelector('.category-desc')?.textContent?.toLowerCase() || '';
+
+    const matches = !cleanQuery ||
+      titleKey.includes(cleanQuery) ||
+      labelText.includes(cleanQuery) ||
+      descText.includes(cleanQuery);
+
+    item.classList.toggle('hidden', !matches);
+  });
+}
 
 /**
  * Resolve effective theme (light or dark) based on setting
@@ -195,6 +409,9 @@ async function loadSettings() {
   }
   notifySyncCheckbox.checked = !!settings.notifyOnSync;
 
+  const localData = await api.storage.local.get(['availableCategories', 'lastBookmarkCount']);
+  renderCategoryGrid(localData.availableCategories, settings.selectedCategories);
+
   updateDynamicPanels();
 }
 
@@ -259,15 +476,35 @@ async function saveSettings() {
   btnReset.disabled = true;
   const originalSaveText = btnSave.textContent;
 
+  // Gather checked categories from the grid
+  const checkedBoxes = Array.from(categoryGrid ? categoryGrid.querySelectorAll('.category-checkbox:checked') : []);
+  const totalBoxes = categoryGrid ? categoryGrid.querySelectorAll('.category-checkbox').length : 0;
+
+  if (totalBoxes > 0 && checkedBoxes.length === 0) {
+    showToast('⚠️ Please select at least one category to sync.');
+    btnSave.disabled = false;
+    btnReset.disabled = false;
+    btnSave.textContent = originalSaveText;
+    return;
+  }
+
+  // If all are checked, save empty array [] to denote 'All'
+  const selectedCategoriesToSave = (totalBoxes === 0 || checkedBoxes.length === totalBoxes)
+    ? []
+    : checkedBoxes.map((cb) => cb.value);
+
   try {
     const currentSettings = await api.storage.sync.get(DEFAULT_SETTINGS);
+
+    const categoriesChanged = !areCategoryListsEqual(currentSettings.selectedCategories, selectedCategoriesToSave);
 
     const sourceOrPresetChanged =
       currentSettings.preset !== selectedPreset ||
       currentSettings.strategy !== selectedStrategy ||
       currentSettings.forkRepo !== cleanForkRepo ||
       currentSettings.customFilePath !== cleanCustomFilePath ||
-      currentSettings.githubToken !== cleanGithubToken;
+      currentSettings.githubToken !== cleanGithubToken ||
+      categoriesChanged;
     const locationChanged = currentSettings.syncLocation !== selectedSyncLocation;
 
     const newSettings = {
@@ -278,7 +515,8 @@ async function saveSettings() {
       customFilePath: cleanCustomFilePath,
       githubToken: cleanGithubToken,
       notifyOnSync: notifySyncCheckbox.checked,
-      theme: selectedTheme
+      theme: selectedTheme,
+      selectedCategories: selectedCategoriesToSave
     };
 
     await api.storage.sync.set(newSettings);
@@ -417,6 +655,30 @@ if (api.storage && api.storage.onChanged) {
         radio.checked = (radio.value === newTheme);
       }
     }
+  });
+}
+
+if (toggleAllCategories) {
+  toggleAllCategories.addEventListener('change', (e) => {
+    setAllCategoryCheckboxes(e.target.checked);
+  });
+}
+
+if (btnSelectAllCats) {
+  btnSelectAllCats.addEventListener('click', () => {
+    setAllCategoryCheckboxes(true);
+  });
+}
+
+if (btnDeselectAllCats) {
+  btnDeselectAllCats.addEventListener('click', () => {
+    setAllCategoryCheckboxes(false);
+  });
+}
+
+if (categorySearchInput) {
+  categorySearchInput.addEventListener('input', (e) => {
+    filterCategoriesInGrid(e.target.value);
   });
 }
 

@@ -552,3 +552,200 @@ input[type="text"]:focus, input[type="url"]:focus, input[type="password"]:focus,
 .btn-secondary-pill:active {
   transform: scale(0.97);
 }
+
+/* Category Filter Section */
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.category-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.checkbox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: var(--subpanel-bg);
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-ink);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.checkbox-pill:hover {
+  border-color: var(--action-blue);
+}
+
+.checkbox-pill input[type="checkbox"] {
+  accent-color: var(--action-blue);
+  cursor: pointer;
+}
+
+.category-quick-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-subtle-action {
+  background: var(--btn-secondary-bg);
+  color: var(--text-ink);
+  border: 1px solid var(--card-border);
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-family: var(--font-apple);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-subtle-action:hover {
+  background: var(--btn-secondary-hover);
+  border-color: var(--action-blue);
+}
+
+.category-search-wrapper {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.category-search-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.category-search-input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--input-bg);
+  color: var(--text-ink);
+  font-family: var(--font-apple);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-search-input:focus {
+  border-color: var(--action-blue);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 2px;
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--card-border) transparent;
+}
+
+.category-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-grid::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 6px;
+}
+
+.category-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: var(--subpanel-bg);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+}
+
+.category-item:hover {
+  border-color: var(--action-blue);
+}
+
+.category-item.selected {
+  border-color: var(--action-blue);
+  background: rgba(0, 102, 204, 0.05);
+}
+
+.category-item.hidden {
+  display: none !important;
+}
+
+.category-item input[type="checkbox"] {
+  accent-color: var(--action-blue);
+  margin-top: 3px;
+  cursor: pointer;
+}
+
+.category-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.category-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.category-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--chip-bg);
+  padding: 1px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.category-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 600px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+}

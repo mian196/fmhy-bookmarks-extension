@@ -20,8 +20,23 @@ const DEFAULT_SETTINGS = {
   customFilePath: '',
   githubToken: '',
   notifyOnSync: false,
-  syncLocation: 'toolbar' // 'toolbar' | 'other' | 'menu'
+  syncLocation: 'toolbar', // 'toolbar' | 'other' | 'menu'
+  selectedCategories: [] // [] = All categories, or array of category titles
 };
+
+/**
+ * Compares two category title arrays for set equality
+ */
+function areCategoryListsEqual(a, b) {
+  const arrA = Array.isArray(a) ? a : [];
+  const arrB = Array.isArray(b) ? b : [];
+  if (arrA.length !== arrB.length) return false;
+  const setA = new Set(arrA.map((x) => String(x).toLowerCase().trim()));
+  for (const item of arrB) {
+    if (!setA.has(String(item).toLowerCase().trim())) return false;
+  }
+  return true;
+}
 
 const OFFICIAL_REPO = 'fmhy/bookmarks';
 
@@ -123,15 +138,22 @@ async function executeSync(options = { isManual: false }) {
       'lastPreset',
       'lastSourceUrl',
       'hasSyncedBefore',
-      'lastSyncTime'
+      'lastSyncTime',
+      'lastSelectedCategories'
     ]);
 
-    // Reset local cached headers if preset or repository/target changed since last sync
+    const categoriesChanged = !areCategoryListsEqual(
+      localState.lastSelectedCategories,
+      settings.selectedCategories
+    );
+
+    // Reset local cached headers if preset, categories, or repository/target changed since last sync
     if (
       (localState.lastPreset && localState.lastPreset !== settings.preset) ||
-      (localState.lastSourceUrl && localState.lastSourceUrl !== targets.rawUrl)
+      (localState.lastSourceUrl && localState.lastSourceUrl !== targets.rawUrl) ||
+      categoriesChanged
     ) {
-      console.log('Target repository, file, or preset changed. Clearing local HTTP cache.');
+      console.log('Target repository, file, preset, or categories changed. Clearing local HTTP cache.');
       localState.lastETag = null;
       localState.lastCommitSha = null;
       localState.lastCommitETag = null;
@@ -208,11 +230,26 @@ async function executeSync(options = { isManual: false }) {
 
     const parsedTree = parseBookmarkHTML(htmlText);
 
+    // Extract available top-level categories with bookmark counts for UI
+    const availableCategories = (parsedTree.children || [])
+      .filter((node) => node.isFolder)
+      .map((node) => ({
+        title: node.title,
+        count: countLinksInTree(node)
+      }));
+
     await api.storage.local.set({
+      availableCategories,
       lastSyncMessage: 'Updating browser bookmarks tree...'
     });
 
-    const syncResult = await syncFMHYBookmarks(parsedTree, settings.syncLocation || 'toolbar');
+    // Apply category filtering if configured
+    const effectiveTree = filterBookmarkTreeByCategories(
+      parsedTree,
+      settings.selectedCategories
+    );
+
+    const syncResult = await syncFMHYBookmarks(effectiveTree, settings.syncLocation || 'toolbar');
 
     if (!syncResult.success) {
       throw new Error(syncResult.error || 'Failed to update browser bookmarks.');
@@ -239,7 +276,8 @@ async function executeSync(options = { isManual: false }) {
       lastCommitETag: commitCheck.etag || localState.lastCommitETag || null,
       lastCommitSha: latestSha || null,
       lastSourceUrl: targets.rawUrl,
-      lastPreset: settings.preset
+      lastPreset: settings.preset,
+      lastSelectedCategories: settings.selectedCategories || []
     });
 
     showNotification(
@@ -452,7 +490,13 @@ api.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateAlarmSchedule().then(() => sendResponse({ success: true }));
     return true;
   } else if (message.action === 'CLEAR_CACHE') {
-    api.storage.local.set({ lastETag: null, lastCommitSha: null, lastCommitETag: null, lastPreset: null }).then(() => sendResponse({ success: true }));
+    api.storage.local.set({
+      lastETag: null,
+      lastCommitSha: null,
+      lastCommitETag: null,
+      lastPreset: null,
+      lastSelectedCategories: null
+    }).then(() => sendResponse({ success: true }));
     return true;
   }
 });
