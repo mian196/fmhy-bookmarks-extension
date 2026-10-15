@@ -190,8 +190,16 @@ async function handleSyncClick() {
         messageBanner.textContent = 'Sync operation is already in progress.';
       } else if (response.modified === false) {
         messageBanner.textContent = 'Bookmarks are already up to date with GitHub!';
+      } else if (response.isInitial) {
+        messageBanner.textContent = `Successfully synced ${response.count.toLocaleString()} bookmarks!`;
+      } else if (response.added === 0 && response.deleted === 0) {
+        messageBanner.textContent = 'Bookmarks are up to date (no changes detected).';
       } else {
-        messageBanner.textContent = `Successfully synced ${response.count} bookmarks!`;
+        const changes = [];
+        if (response.added > 0) changes.push(`+${response.added.toLocaleString()} added`);
+        if (response.deleted > 0) changes.push(`-${response.deleted.toLocaleString()} removed`);
+        if (response.updated > 0) changes.push(`${response.updated.toLocaleString()} updated`);
+        messageBanner.textContent = `Sync complete: ${changes.join(', ')} (${response.count.toLocaleString()} total).`;
       }
     }
   } catch (err) {

@@ -194,15 +194,37 @@ async function prepareFMHYRootFolder(targetParentId, title = 'FMHY') {
       } catch (e) {}
     }
 
+    primaryRoot._isNew = false;
     return primaryRoot;
   }
 
   // If no existing FMHY root folder exists, create a new one at Index 0 inside targetParentId
-  return await api.bookmarks.create({
+  const createdRoot = await api.bookmarks.create({
     parentId: targetParentId,
     title: title || 'FMHY',
     index: 0
   });
+  createdRoot._isNew = true;
+  return createdRoot;
+}
+
+/**
+ * Recursively counts link bookmark nodes in a bookmark tree node
+ * @param {Object} node - Bookmark tree node
+ * @returns {number} Link count
+ */
+function countLinksInTree(node) {
+  let count = 0;
+  if (!node) return 0;
+  if (node.url) {
+    count++;
+  }
+  if (node.children && node.children.length > 0) {
+    for (const child of node.children) {
+      count += countLinksInTree(child);
+    }
+  }
+  return count;
 }
 
 /**
@@ -212,10 +234,19 @@ async function prepareFMHYRootFolder(targetParentId, title = 'FMHY') {
  *
  * @param {string} parentId - Parent bookmark folder ID
  * @param {Array} childrenNodes - Parsed incoming node objects
+ * @param {Object} [stats] - Diff statistics tracking { total, added, deleted, updated }
  * @returns {Promise<number>} Active link bookmark count
  */
-async function reconcileBookmarkSubtree(parentId, childrenNodes) {
-  let activeLinkCount = 0;
+async function reconcileBookmarkSubtree(parentId, childrenNodes, stats = null) {
+  if (!stats) {
+    stats = {
+      total: 0,
+      added: 0,
+      deleted: 0,
+      updated: 0
+    };
+  }
+
   if (!childrenNodes) childrenNodes = [];
 
   // 1. Fetch current browser children under this parent
@@ -274,14 +305,16 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes) {
       const targetTitle = incomingLink.title || incomingLink.url;
       if (matchedNode.title !== targetTitle) {
         linkUpdatePromises.push(
-          api.bookmarks.update(matchedNode.id, { title: targetTitle }).catch(() => {})
+          api.bookmarks.update(matchedNode.id, { title: targetTitle })
+            .then(() => { stats.updated++; })
+            .catch(() => {})
         );
       }
     } else {
       // Link needs to be created
       linksToCreate.push(incomingLink);
     }
-    activeLinkCount++;
+    stats.total++;
   }
 
   // Execute link title updates concurrently
@@ -307,6 +340,7 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes) {
         batch.map((id) => api.bookmarks.remove(id).catch(() => {}))
       );
     }
+    stats.deleted += obsoleteLinkIds.length;
   }
 
   // Batch create missing links
@@ -325,6 +359,7 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes) {
         )
       );
     }
+    stats.added += linksToCreate.length;
   }
 
   // --- 3. Reconcile Folder Structure ---
@@ -352,29 +387,34 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes) {
 
     if (folderId) {
       folderTasks.push(
-        reconcileBookmarkSubtree(folderId, folderNode.children)
+        reconcileBookmarkSubtree(folderId, folderNode.children, stats)
       );
     }
   }
 
   // Recurse subfolders concurrently per tree level
   if (folderTasks.length > 0) {
-    const subfolderCounts = await Promise.all(folderTasks);
-    for (const count of subfolderCounts) {
-      activeLinkCount += count;
-    }
+    await Promise.all(folderTasks);
   }
 
   // Delete leftover obsolete subfolders not present in incoming tree
   for (const [, remainingList] of existingFoldersByTitle) {
     for (const obsoleteFolder of remainingList) {
       try {
+        if (api.bookmarks && api.bookmarks.getSubTree) {
+          const subTree = await api.bookmarks.getSubTree(obsoleteFolder.id);
+          if (subTree && subTree.length > 0) {
+            stats.deleted += countLinksInTree(subTree[0]);
+          }
+        }
         await api.bookmarks.removeTree(obsoleteFolder.id);
-      } catch (e) {}
+      } catch (e) {
+        console.warn(`Failed to remove obsolete folder ${obsoleteFolder.id}:`, e);
+      }
     }
   }
 
-  return activeLinkCount;
+  return stats.total;
 }
 
 /**
@@ -388,7 +428,7 @@ async function buildBookmarkSubtree(parentId, childrenNodes) {
  * Performs incremental diffing sync of FMHY bookmark tree to the selected target container
  * @param {Object} parsedTree - Parsed FMHY tree root from html_parser
  * @param {string} [syncLocation='toolbar'] - Target location ('toolbar' | 'other' | 'menu')
- * @returns {Promise<{ success: boolean, count: number, rootId?: string, error?: string }>}
+ * @returns {Promise<{ success: boolean, count: number, added: number, deleted: number, updated: number, isNew?: boolean, rootId?: string, error?: string }>}
  */
 async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
   try {
@@ -397,12 +437,23 @@ async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
     // 1. Prepare FMHY Root Folder in-place at target container
     const fmhyRoot = await prepareFMHYRootFolder(targetParentId, parsedTree.title || 'FMHY');
 
+    const stats = {
+      total: 0,
+      added: 0,
+      deleted: 0,
+      updated: 0
+    };
+
     // 2. Perform incremental diffing sync under FMHY root
-    const count = await reconcileBookmarkSubtree(fmhyRoot.id, parsedTree.children);
+    await reconcileBookmarkSubtree(fmhyRoot.id, parsedTree.children, stats);
 
     return {
       success: true,
-      count: count,
+      count: stats.total,
+      added: stats.added,
+      deleted: stats.deleted,
+      updated: stats.updated,
+      isNew: Boolean(fmhyRoot._isNew),
       rootId: fmhyRoot.id
     };
   } catch (error) {
@@ -410,6 +461,9 @@ async function syncFMHYBookmarks(parsedTree, syncLocation = 'toolbar') {
     return {
       success: false,
       count: 0,
+      added: 0,
+      deleted: 0,
+      updated: 0,
       error: error.message || 'Unknown error during sync'
     };
   }
@@ -423,6 +477,7 @@ if (typeof self !== 'undefined') {
   self.reconcileBookmarkSubtree = reconcileBookmarkSubtree;
   self.buildBookmarkSubtree = buildBookmarkSubtree;
   self.syncFMHYBookmarks = syncFMHYBookmarks;
+  self.countLinksInTree = countLinksInTree;
 }
 
 

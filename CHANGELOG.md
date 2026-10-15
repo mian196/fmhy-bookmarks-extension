@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- 🔔 **Delta-Based Sync Notifications**: Updated desktop notifications and popup status banners to report actual bookmark changes (`+X added, -Y removed`) on subsequent sync runs instead of repeatedly displaying the full collection count (~26k), while retaining the total link count for initial syncs.
+- 📊 **Bookmark Diff Statistics Tracking**: Enhanced `reconcileBookmarkSubtree` and `syncFMHYBookmarks` in `bookmark_sync.js` to accurately aggregate active additions, deletions (including links within pruned obsolete folders), and title updates across all folder subtrees.
+
 ---
 
 ## [v1.5.2] - 2026-10-15

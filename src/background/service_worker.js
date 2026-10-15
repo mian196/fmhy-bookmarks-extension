@@ -121,7 +121,9 @@ async function executeSync(options = { isManual: false }) {
       'lastCommitETag',
       'lastBookmarkCount',
       'lastPreset',
-      'lastSourceUrl'
+      'lastSourceUrl',
+      'hasSyncedBefore',
+      'lastSyncTime'
     ]);
 
     // Reset local cached headers if preset or repository/target changed since last sync
@@ -216,12 +218,23 @@ async function executeSync(options = { isManual: false }) {
       throw new Error(syncResult.error || 'Failed to update browser bookmarks.');
     }
 
+    const isInitialSync = (!localState.hasSyncedBefore && !localState.lastSyncTime) ||
+      (syncResult.isNew && (!localState.lastBookmarkCount || localState.lastBookmarkCount === 0));
+
+    const locationLabel = getNotificationLocationLabel(settings.syncLocation);
+    const notificationMessage = formatSyncNotificationMessage(syncResult, isInitialSync, locationLabel);
+    const statusMessage = formatSyncStatusMessage(syncResult, isInitialSync, latestSha);
+
     const nowIso = new Date().toISOString();
     await api.storage.local.set({
       lastSyncStatus: 'success',
       lastSyncTime: nowIso,
-      lastSyncMessage: `Synced ${syncResult.count} bookmarks (Commit ${latestSha ? latestSha.substring(0, 7) : 'latest'})`,
+      lastSyncMessage: statusMessage,
       lastBookmarkCount: syncResult.count,
+      lastSyncAdded: syncResult.added,
+      lastSyncDeleted: syncResult.deleted,
+      lastSyncUpdated: syncResult.updated,
+      hasSyncedBefore: true,
       lastETag: newETag || null,
       lastCommitETag: commitCheck.etag || localState.lastCommitETag || null,
       lastCommitSha: latestSha || null,
@@ -229,14 +242,20 @@ async function executeSync(options = { isManual: false }) {
       lastPreset: settings.preset
     });
 
-    const locationLabel = getNotificationLocationLabel(settings.syncLocation);
-
     showNotification(
       'FMHY Bookmarks Synced',
-      `Updated ${syncResult.count} bookmarks in ${locationLabel}.`
+      notificationMessage
     );
 
-    return { success: true, count: syncResult.count, modified: true };
+    return {
+      success: true,
+      count: syncResult.count,
+      added: syncResult.added,
+      deleted: syncResult.deleted,
+      updated: syncResult.updated,
+      isInitial: isInitialSync,
+      modified: true
+    };
   } catch (error) {
     console.error('Background Sync Error:', error);
     const nowIso = new Date().toISOString();
@@ -256,6 +275,68 @@ async function executeSync(options = { isManual: false }) {
   } finally {
     isSyncing = false;
   }
+}
+
+/**
+ * Formats user-facing notification message based on diff results
+ * @param {Object} syncResult - { count, added, deleted, updated }
+ * @param {boolean} isInitialSync - True if this is the first full sync
+ * @param {string} locationLabel - Label of destination container
+ * @returns {string} Notification message body
+ */
+function formatSyncNotificationMessage(syncResult, isInitialSync, locationLabel) {
+  if (isInitialSync) {
+    return `Synced ${syncResult.count.toLocaleString()} bookmarks in ${locationLabel}.`;
+  }
+
+  const parts = [];
+  if (syncResult.added > 0) {
+    parts.push(`+${syncResult.added.toLocaleString()} added`);
+  }
+  if (syncResult.deleted > 0) {
+    parts.push(`-${syncResult.deleted.toLocaleString()} removed`);
+  }
+
+  if (parts.length > 0) {
+    if (syncResult.updated > 0) {
+      parts.push(`${syncResult.updated.toLocaleString()} updated`);
+    }
+    return `${parts.join(', ')} in ${locationLabel}.`;
+  }
+
+  if (syncResult.updated > 0) {
+    return `${syncResult.updated.toLocaleString()} bookmarks updated in ${locationLabel}.`;
+  }
+
+  return `Bookmarks are up to date in ${locationLabel} (no changes).`;
+}
+
+/**
+ * Formats status message saved in storage and displayed in popup/options
+ */
+function formatSyncStatusMessage(syncResult, isInitialSync, commitSha) {
+  const commitSuffix = commitSha ? ` (Commit ${commitSha.substring(0, 7)})` : '';
+  if (isInitialSync) {
+    return `Synced ${syncResult.count.toLocaleString()} bookmarks${commitSuffix}`;
+  }
+
+  const parts = [];
+  if (syncResult.added > 0) {
+    parts.push(`+${syncResult.added.toLocaleString()} added`);
+  }
+  if (syncResult.deleted > 0) {
+    parts.push(`-${syncResult.deleted.toLocaleString()} removed`);
+  }
+
+  if (parts.length > 0) {
+    return `Synced: ${parts.join(', ')} (${syncResult.count.toLocaleString()} total)${commitSuffix}`;
+  }
+
+  if (syncResult.updated > 0) {
+    return `Updated ${syncResult.updated.toLocaleString()} bookmark titles${commitSuffix}`;
+  }
+
+  return `Up to date (${syncResult.count.toLocaleString()} bookmarks)${commitSuffix}`;
 }
 
 /**
