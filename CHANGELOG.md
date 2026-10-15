@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [v1.5.2] - 2026-10-15
+
 ### Fixed
 - 📁 **Strict FMHY Folder Matching**: Updated root folder detection in `bookmark_sync.js` to strictly match exact uppercase `FMHY` titles, preventing accidental matching against other folders on the Bookmarks Bar.
 - 🔤 **Unicode & Emoji Entity Decoding**: Upgraded HTML entity parser in `html_parser.js` to use `String.fromCodePoint()` and added `&apos;` support, preventing corrupted characters for emojis and symbols above `0xFFFF`.
