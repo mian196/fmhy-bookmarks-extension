@@ -25,6 +25,12 @@
 - **Zero bloat**: 100% Vanilla JavaScript without npm overhead or heavy dependencies.
 - **High Performance**: Optimized with parallel batching for 1-second sync speeds on Firefox and Chromium.
 
+> [!WARNING]
+> ### 🛡️ Repository Source & Security Disclaimer
+> **Only sync from the official FMHY repository ([`fmhy/bookmarks`](https://github.com/fmhy/bookmarks)) or your own personal fork that you control and manage yourself.**
+>
+> **Do not trust or add untrusted third-party repositories.** Third-party forks can be modified to include malicious, unvetted, or harmful links that are **not** present in the official FMHY collection. Always audit any custom fork before syncing it to your browser.
+
 ---
 
 ## ✨ Features
