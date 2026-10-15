@@ -1,0 +1,65 @@
+name: Build Preview Artifacts (Manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Extract Manifest Version Dynamically
+        id: get_version
+        run: |
+          VERSION=$(python -c "import json; print(json.load(open('platform/chromium/manifest.json'))['version'])")
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Build Multi-Platform Extension Packages
+        run: python tools/build.py "${{ env.VERSION }}"
+
+      - name: Verify Generated ZIP Archives
+        run: |
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip"
+          test -f "dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip"
+
+      - name: Upload Chromium Extension Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: fmhy-bookmarks-v${{ env.VERSION }}-chromium
+          path: dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.chromium.zip
+          retention-days: 30
+
+      - name: Upload Firefox Extension Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: fmhy-bookmarks-v${{ env.VERSION }}-firefox
+          path: dist/fmhy-bookmarks-extension-v${{ env.VERSION }}.firefox.zip
+          retention-days: 30
+
+      - name: Generate Action Summary
+        run: |
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ### 📦 Extension Preview Artifacts (v${{ env.VERSION }})
+
+          Pre-built extension packages have been uploaded as artifacts:
+          - **Chromium** (`Chrome`, `Edge`, `Brave`, `Opera`)
+          - **Firefox** (`Desktop`, `ESR`, `Zen`, `Waterfox`, `Floorp`)
+
+          #### 🛠️ Testing & Installation:
+          - **Chrome / Chromium**:
+            1. Download `fmhy-bookmarks-v${{ env.VERSION }}-chromium` and extract the ZIP.
+            2. Open `chrome://extensions/` and enable **Developer mode** (top-right).
+            3. Click **Load unpacked** and select the extracted folder.
+          - **Firefox**:
+            1. Download `fmhy-bookmarks-v${{ env.VERSION }}-firefox` and extract the ZIP.
+            2. Open `about:debugging#/runtime/this-firefox`.
+            3. Click **Load Temporary Add-on...** and select the ZIP file or its `manifest.json`.
+          EOF
