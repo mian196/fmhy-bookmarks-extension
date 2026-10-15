@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 > [!NOTE]
-> **Bookmark Content Notice**: This extension imports bookmark files directly from [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) without modifying links or hierarchies. If a specific bookmark link is outdated, missing, broken, or miscategorized upstream, please report it to [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) instead. Only report bugs related to the extension's synchronization workflow, browser integration, or UI here.
+> **Upstream Content Notice**: If a specific bookmark link is outdated, dead, or miscategorized upstream in FMHY, please report it directly to [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks). Only report bugs related to the extension itself (synchronization workflow, browser integration, settings, or UI) here.
 
 ## 🐛 Description
 A clear and concise description of what the bug is.

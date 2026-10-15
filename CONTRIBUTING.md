@@ -8,10 +8,9 @@ Thank you for your interest in contributing to **FMHY Bookmarks Auto-Sync**! We 
 
 Before proposing a feature or opening an issue/PR, please understand the scope and purpose of this extension:
 
-- **Primary Goal**: Automatically fetch and synchronize the latest official Netscape bookmark HTML file from [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) directly into the browser.
-- **Strictly Zero-Modification**: The extension imports bookmarks **exactly as-is**. It does **not** modify, alphabetize, re-sort, filter, or restructure bookmark entries or folders.
-- **In-Scope Contributions**: Features, fixes, and improvements strictly tied to the extension's **operational workflow** (e.g. background alarms, sync diffing performance, mount location management, storage/ETag caching, UI/UX dashboard, and browser API compatibility).
-- **Out-of-Scope Requests**: Requests to sort (e.g. alphabetical organization), rename categories, delete dead links, or re-structure the bookmark tree. Bookmark content management belongs upstream at [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks). Users who prefer customized structures can maintain a personal fork (public or private with a GitHub token) and track it using the extension's **Personal Fork** strategy.
+- **Primary Goal**: Automatically fetch and synchronize official Netscape bookmark HTML files from [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks) or personal forks directly into the browser.
+- **In-Scope Contributions**: Features, fixes, and improvements tied to the extension's **operational workflow** (e.g. background alarms, sync diffing performance, category filtering, mount location management, storage/ETag caching, UI/UX preferences, and browser API compatibility).
+- **Upstream Content Management**: Broken, dead, or miscategorized links belong upstream at [`fmhy/bookmarks`](https://github.com/fmhy/bookmarks). Users who prefer custom structures or private bookmarks can also maintain a personal fork and track it using the extension's **Personal Fork** strategy.
 
 ---
 

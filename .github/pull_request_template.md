@@ -17,6 +17,6 @@
 - [ ] Executed `python tools/build.py` successfully
 
 ## 📜 Checklist
-- [ ] Confirmed changes do NOT mutate, sort, or alter upstream bookmark data (mirrors upstream as-is).
-- [ ] Updated `CHANGELOG.md` under current target version.
+- [ ] Tested changes in browser.
+- [ ] Updated `CHANGELOG.md` under current target version (if applicable).
 - [ ] Verified local asset paths (no remote image URLs).
