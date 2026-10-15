@@ -15,7 +15,7 @@
   --success-bg: rgba(52, 199, 89, 0.12);
   --error-red: #ff3b30;
   --error-bg: rgba(255, 59, 48, 0.12);
-  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, 'Inter', sans-serif;
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
 }
 
 [data-theme="dark"] {

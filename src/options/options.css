@@ -13,7 +13,7 @@
   --btn-secondary-hover: #d2d2d7;
   --success-green: #34c759;
   --success-bg: rgba(52, 199, 89, 0.12);
-  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, 'Inter', sans-serif;
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
 }
 
 [data-theme="dark"] {

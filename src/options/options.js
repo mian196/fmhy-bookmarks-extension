@@ -79,7 +79,11 @@ function formatTimeAgo(isoString) {
 async function fetchLatestCommitInfo(repoPath = 'fmhy/bookmarks', token = '') {
   try {
     previewCommitSha.textContent = 'Checking GitHub API...';
-    const cleanRepo = repoPath.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+    const cleanRepo = repoPath
+      .replace(/^https?:\/\/github\.com\//, '')
+      .replace(/\.git$/, '')
+      .replace(/\/$/, '')
+      .trim();
     const targetRepo = cleanRepo || 'fmhy/bookmarks';
 
     previewTargetRepo.textContent = targetRepo;
@@ -235,7 +239,15 @@ async function saveSettings() {
   const selectedStrategy = Array.from(strategyRadios).find(r => r.checked)?.value || 'official';
   const selectedTheme = Array.from(themeRadios).find(r => r.checked)?.value || 'system';
 
-  if (selectedStrategy === 'custom_fork' && !forkRepoInput.value.trim()) {
+  const cleanForkRepo = forkRepoInput.value
+    .replace(/^https?:\/\/github\.com\//, '')
+    .replace(/\.git$/, '')
+    .replace(/\/$/, '')
+    .trim();
+  const cleanCustomFilePath = customFilePathInput.value.trim().replace(/^\/+/, '');
+  const cleanGithubToken = githubTokenInput ? githubTokenInput.value.trim() : '';
+
+  if (selectedStrategy === 'custom_fork' && !cleanForkRepo) {
     showToast('Error: Please enter a valid GitHub repository (owner/repo).');
     return;
   }
@@ -246,36 +258,59 @@ async function saveSettings() {
   btnSave.disabled = true;
   btnReset.disabled = true;
   const originalSaveText = btnSave.textContent;
-  btnSave.textContent = 'Moving folder...';
-  showToast(`Moving FMHY folder to ${destLabel}...`, false);
 
   try {
+    const currentSettings = await api.storage.sync.get(DEFAULT_SETTINGS);
+
+    const sourceOrPresetChanged =
+      currentSettings.preset !== selectedPreset ||
+      currentSettings.strategy !== selectedStrategy ||
+      currentSettings.forkRepo !== cleanForkRepo ||
+      currentSettings.customFilePath !== cleanCustomFilePath ||
+      currentSettings.githubToken !== cleanGithubToken;
+    const locationChanged = currentSettings.syncLocation !== selectedSyncLocation;
+
     const newSettings = {
       preset: selectedPreset,
       syncLocation: selectedSyncLocation,
       strategy: selectedStrategy,
-      forkRepo: forkRepoInput.value.trim(),
-      customFilePath: customFilePathInput.value.trim(),
-      githubToken: githubTokenInput ? githubTokenInput.value.trim() : '',
+      forkRepo: cleanForkRepo,
+      customFilePath: cleanCustomFilePath,
+      githubToken: cleanGithubToken,
       notifyOnSync: notifySyncCheckbox.checked,
       theme: selectedTheme
     };
 
     await api.storage.sync.set(newSettings);
-
-    // Reset local cache & trigger immediate sync for target location updates
-    await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
     await api.runtime.sendMessage({ action: 'UPDATE_SCHEDULE' });
 
-    // Await background sync completion until move finishes
-    const syncRes = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
+    if (sourceOrPresetChanged) {
+      btnSave.textContent = 'Syncing...';
+      showToast('Preferences saved. Fetching updated bookmarks...', false);
+      await api.runtime.sendMessage({ action: 'CLEAR_CACHE' });
+      const syncRes = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
 
-    if (syncRes && syncRes.success) {
-      showToast(`Settings saved & FMHY folder moved to ${destLabel}!`);
-    } else if (syncRes && syncRes.error) {
-      showToast(`Notice: ${syncRes.error}`);
+      if (syncRes && syncRes.success) {
+        showToast('Settings saved & bookmarks synchronized!');
+      } else if (syncRes && syncRes.error) {
+        showToast(`Notice: ${syncRes.error}`);
+      } else {
+        showToast('Preferences saved successfully!');
+      }
+    } else if (locationChanged) {
+      btnSave.textContent = 'Moving folder...';
+      showToast(`Moving FMHY folder to ${destLabel}...`, false);
+      const syncRes = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
+
+      if (syncRes && syncRes.success) {
+        showToast(`Settings saved & FMHY folder moved to ${destLabel}!`);
+      } else if (syncRes && syncRes.error) {
+        showToast(`Notice: ${syncRes.error}`);
+      } else {
+        showToast(`Preferences saved & FMHY folder moved to ${destLabel}!`);
+      }
     } else {
-      showToast(`Preferences saved & FMHY folder moved to ${destLabel}!`);
+      showToast('Settings saved successfully!');
     }
   } catch (err) {
     showToast(`Error: ${err.message || 'Failed to update preferences.'}`);

@@ -186,9 +186,13 @@ async function handleSyncClick() {
   try {
     const response = await api.runtime.sendMessage({ action: 'TRIGGER_SYNC' });
     if (response && response.success) {
-      messageBanner.textContent = response.modified === false
-        ? 'Bookmarks are already up to date with GitHub!'
-        : `Successfully synced ${response.count} bookmarks!`;
+      if (response.skipped) {
+        messageBanner.textContent = 'Sync operation is already in progress.';
+      } else if (response.modified === false) {
+        messageBanner.textContent = 'Bookmarks are already up to date with GitHub!';
+      } else {
+        messageBanner.textContent = `Successfully synced ${response.count} bookmarks!`;
+      }
     }
   } catch (err) {
     messageBanner.textContent = err.message || 'Error communicating with background worker.';

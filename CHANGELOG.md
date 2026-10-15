@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- 📁 **Strict FMHY Folder Matching**: Updated root folder detection in `bookmark_sync.js` to strictly match exact uppercase `FMHY` titles, preventing accidental matching against other folders on the Bookmarks Bar.
+- 🔤 **Unicode & Emoji Entity Decoding**: Upgraded HTML entity parser in `html_parser.js` to use `String.fromCodePoint()` and added `&apos;` support, preventing corrupted characters for emojis and symbols above `0xFFFF`.
+- 📑 **Netscape `<DL>` Tag Parsing Flexibility**: Updated bookmark parser regular expression to support `<DL>` tags with whitespace and HTML attributes (`<dl\b[^>]*>`), ensuring compatibility with custom fork exports and tools.
+- 🔗 **Custom Fork Path & Repo Sanitization**: Automatically strip `.git` suffixes from repository URLs and leading slashes from custom file paths in `service_worker.js` and `options.js` to prevent 404 errors.
+- 💬 **Concurrent Sync Status Feedback**: Fixed popup status banner to display a clear `"Sync operation is already in progress."` message instead of reporting `0` synced bookmarks when a sync is triggered while another is active.
+
+### Changed
+- 🔒 **Local Native System Fonts & Store Compliance**: Removed external Google Fonts CDN links from `popup.html` and `options.html`, fully relying on local native OS system fonts (`-apple-system`, `Segoe UI`, `Roboto`) for faster offline loads.
+
+### Performance
+- ⚡ **Selective Settings Sync & Cache Preservation**: Optimized `saveSettings` in `options.js` to only purge cache and trigger heavy ~3.3MB re-downloads when source repository, collection preset, or file path settings change, keeping theme and notification updates instant.
+
 ---
 
 ## [v1.5.1] - 2026-09-21

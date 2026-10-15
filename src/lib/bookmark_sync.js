@@ -99,7 +99,7 @@ async function cleanExistingFMHYFolders() {
     const children = await api.bookmarks.getChildren(barId);
     if (children && children.length > 0) {
       for (const child of children) {
-        if (!child.url && child.title && child.title.toUpperCase().includes('FMHY')) {
+        if (!child.url && child.title && child.title.trim() === 'FMHY') {
           try {
             await api.bookmarks.removeTree(child.id);
           } catch (err) {
@@ -116,7 +116,7 @@ async function cleanExistingFMHYFolders() {
   const matches = await api.bookmarks.search({ title: 'FMHY' });
   if (matches && matches.length > 0) {
     for (const match of matches) {
-      if (!match.url) {
+      if (!match.url && match.title && match.title.trim() === 'FMHY') {
         try {
           await api.bookmarks.removeTree(match.id);
         } catch (err) {}
@@ -140,7 +140,7 @@ async function prepareFMHYRootFolder(targetParentId, title = 'FMHY') {
   try {
     const children = await api.bookmarks.getChildren(targetParentId);
     const fmhyFolders = (children || []).filter(
-      (child) => !child.url && child.title && child.title.toUpperCase().includes('FMHY')
+      (child) => !child.url && child.title && child.title.trim() === 'FMHY'
     );
 
     if (fmhyFolders.length > 0) {
@@ -163,7 +163,9 @@ async function prepareFMHYRootFolder(targetParentId, title = 'FMHY') {
   if (!primaryRoot) {
     try {
       const matches = await api.bookmarks.search({ title: 'FMHY' });
-      const folderMatches = (matches || []).filter((m) => !m.url);
+      const folderMatches = (matches || []).filter(
+        (m) => !m.url && m.title && m.title.trim() === 'FMHY'
+      );
       if (folderMatches.length > 0) {
         primaryRoot = folderMatches[0];
         try {

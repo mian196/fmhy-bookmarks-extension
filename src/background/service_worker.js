@@ -39,9 +39,13 @@ async function resolveTargetPaths() {
   let githubToken = '';
 
   if (settings.strategy === 'custom_fork' && settings.forkRepo) {
-    repo = settings.forkRepo.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '').trim();
+    repo = settings.forkRepo
+      .replace(/^https?:\/\/github\.com\//, '')
+      .replace(/\.git$/, '')
+      .replace(/\/$/, '')
+      .trim();
     if (settings.customFilePath && settings.customFilePath.trim()) {
-      filename = settings.customFilePath.trim();
+      filename = settings.customFilePath.trim().replace(/^\/+/, '');
     }
     if (settings.githubToken && settings.githubToken.trim()) {
       githubToken = settings.githubToken.trim();
@@ -116,12 +120,16 @@ async function executeSync(options = { isManual: false }) {
       'lastCommitSha',
       'lastCommitETag',
       'lastBookmarkCount',
-      'lastPreset'
+      'lastPreset',
+      'lastSourceUrl'
     ]);
 
-    // Reset local cached headers if preset target changed since last sync
-    if (localState.lastPreset && localState.lastPreset !== settings.preset) {
-      console.log(`Preset changed from '${localState.lastPreset}' to '${settings.preset}'. Clearing local HTTP cache.`);
+    // Reset local cached headers if preset or repository/target changed since last sync
+    if (
+      (localState.lastPreset && localState.lastPreset !== settings.preset) ||
+      (localState.lastSourceUrl && localState.lastSourceUrl !== targets.rawUrl)
+    ) {
+      console.log('Target repository, file, or preset changed. Clearing local HTTP cache.');
       localState.lastETag = null;
       localState.lastCommitSha = null;
       localState.lastCommitETag = null;

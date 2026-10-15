@@ -13,11 +13,25 @@ function decodeHTMLEntities(text) {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
     .replace(/&#039;/g, "'")
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'")
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, code) => {
+      try {
+        return String.fromCodePoint(Number(code));
+      } catch {
+        return '';
+      }
+    })
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+      try {
+        return String.fromCodePoint(parseInt(hex, 16));
+      } catch {
+        return '';
+      }
+    });
 }
 
 /**
@@ -29,8 +43,8 @@ function parseBookmarkHTML(htmlString) {
   const rootNode = { title: 'FMHY', isFolder: true, children: [] };
   const stack = [rootNode];
 
-  // Regex pattern matching <H3...>, <A...>, <DL>, and </DL>
-  const tagRegex = /<h3[^>]*>([\s\S]*?)<\/h3>|<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>|<dl>|<\/dl>/gi;
+  // Regex pattern matching <H3...>, <A...>, <DL...>, and </DL>
+  const tagRegex = /<h3[^>]*>([\s\S]*?)<\/h3>|<a\s+[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>|<dl\b[^>]*>|<\/dl>/gi;
 
   let match;
   let currentPendingFolderTitle = null;
