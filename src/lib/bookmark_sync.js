@@ -228,6 +228,23 @@ function countLinksInTree(node) {
 }
 
 /**
+ * Normalizes bookmark URLs for comparison to match browser storage canonicalization
+ * (e.g., standardizing origin trailing slashes: https://example.com -> https://example.com/)
+ * @param {string} url - Target URL string
+ * @returns {string} Normalized URL string
+ */
+function normalizeBookmarkUrl(url) {
+  if (!url) return '';
+  const trimmed = url.trim();
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.href;
+  } catch (e) {
+    return trimmed;
+  }
+}
+
+/**
  * Recursively reconciles (diffs) bookmarks and folders under a parent ID.
  * Reuses existing folder and link nodes matching title/URL to minimize
  * WebExtension bookmark mutations and avoid browser sync conflicts.
@@ -271,7 +288,7 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes, stats = null) {
       existingFoldersByTitle.get(titleKey).push(child);
     } else {
       // Link
-      const urlKey = child.url.trim();
+      const urlKey = normalizeBookmarkUrl(child.url);
       if (!existingLinksByUrl.has(urlKey)) {
         existingLinksByUrl.set(urlKey, []);
       }
@@ -296,7 +313,7 @@ async function reconcileBookmarkSubtree(parentId, childrenNodes, stats = null) {
   const linkUpdatePromises = [];
 
   for (const incomingLink of incomingLinks) {
-    const urlKey = incomingLink.url.trim();
+    const urlKey = normalizeBookmarkUrl(incomingLink.url);
     const existingList = existingLinksByUrl.get(urlKey);
 
     if (existingList && existingList.length > 0) {
@@ -478,6 +495,7 @@ if (typeof self !== 'undefined') {
   self.buildBookmarkSubtree = buildBookmarkSubtree;
   self.syncFMHYBookmarks = syncFMHYBookmarks;
   self.countLinksInTree = countLinksInTree;
+  self.normalizeBookmarkUrl = normalizeBookmarkUrl;
 }
 
 

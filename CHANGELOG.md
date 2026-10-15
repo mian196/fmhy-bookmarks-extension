@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔔 **Delta-Based Sync Notifications**: Updated desktop notifications and popup status banners to report actual bookmark changes (`+X added, -Y removed`) on subsequent sync runs instead of repeatedly displaying the full collection count (~26k), while retaining the total link count for initial syncs.
 - 📊 **Bookmark Diff Statistics Tracking**: Enhanced `reconcileBookmarkSubtree` and `syncFMHYBookmarks` in `bookmark_sync.js` to accurately aggregate active additions, deletions (including links within pruned obsolete folders), and title updates across all folder subtrees.
 
+### Fixed
+- 🔗 **Browser URL Canonicalization Diff Churn**: Implemented `normalizeBookmarkUrl` in `bookmark_sync.js` to normalize origin URLs (handling trailing slashes). This eliminates recurring false diff churn where 357 domain-root bookmarks were repeatedly reported as `+357 added, -357 removed` on every run due to browser bookmark storage automatically appending trailing slashes to origin URLs.
+
 ---
 
 ## [v1.5.2] - 2026-10-15
