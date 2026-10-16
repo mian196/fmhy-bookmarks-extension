@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [v1.5.3] - 2026-10-16
+
 ### Added
 - 🗂️ **Selective Category-Wise Sync**: Added an opt-in Category Filter section in Options (`options.html`) allowing users to choose exactly which top-level categories (e.g., Video, Privacy, Gaming, Audio) to mirror into their browser bookmarks bar. Eliminates bookmarks bar bloat by selectively syncing only desired categories (e.g., syncing ~2.2k bookmarks instead of the entire ~26k collection).
 - 🏷️ **Dynamic Category Metadata & Link Counts**: Dynamically extracts top-level categories and calculates exact bookmark counts per category during synchronization, displaying estimated counts and curated descriptions in the Options UI with live search filtering and quick "Select All" / "Deselect All" controls.
