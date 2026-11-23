@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- ⭐ **Starred-Only Default Preset**: Changed the default bookmark collection preset on fresh installs and settings resets from `Full Directory` to `Starred Only` (`preset: 'starred'`), avoiding syncing ~25,000+ links by default while preserving existing users' saved settings.
+
 ---
 
 ## [v1.5.3] - 2026-10-16

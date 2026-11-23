@@ -125,7 +125,7 @@ function formatTime(isoString) {
  */
 async function updateUI() {
   const syncSettings = await api.storage.sync.get({
-    preset: 'full',
+    preset: 'starred',
     selectedCategories: []
   });
 

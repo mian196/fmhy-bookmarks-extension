@@ -14,7 +14,7 @@ const CHECK_INTERVAL_MINUTES = 360; // 6 Hours periodic fallback check
 const CONTEXT_MENU_SYNC_ID = 'fmhy_sync_now';
 
 const DEFAULT_SETTINGS = {
-  preset: 'full', // 'full' | 'starred'
+  preset: 'starred', // 'full' | 'starred'
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
   customFilePath: '',

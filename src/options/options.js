@@ -64,7 +64,7 @@ const FMHY_CATEGORY_META = {
 const DEFAULT_CATEGORY_KEYS = Object.keys(FMHY_CATEGORY_META);
 
 const DEFAULT_SETTINGS = {
-  preset: 'full',
+  preset: 'starred',
   syncLocation: 'toolbar', // 'toolbar' | 'other' | 'menu'
   strategy: 'official', // 'official' | 'custom_fork'
   forkRepo: '',
@@ -451,7 +451,7 @@ function getDestinationLabel(syncLocation) {
  * Save settings to chrome.storage.sync
  */
 async function saveSettings() {
-  const selectedPreset = Array.from(presetRadios).find(r => r.checked)?.value || 'full';
+  const selectedPreset = Array.from(presetRadios).find(r => r.checked)?.value || 'starred';
   const selectedSyncLocation = Array.from(syncLocationRadios).find(r => r.checked)?.value || 'toolbar';
   const selectedStrategy = Array.from(strategyRadios).find(r => r.checked)?.value || 'official';
   const selectedTheme = Array.from(themeRadios).find(r => r.checked)?.value || 'system';
