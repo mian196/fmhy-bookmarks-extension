@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - ⭐ **Starred-Only Default Preset**: Changed the default bookmark collection preset on fresh installs and settings resets from `Full Directory` to `Starred Only` (`preset: 'starred'`), avoiding syncing ~25,000+ links by default while preserving existing users' saved settings.
 
+### Fixed
+- 🔍 **Category Search Input Padding**: Fixed CSS selector specificity in `options.css` so `.category-search-wrapper .category-search-input` retains its `36px` left padding instead of being overridden by the generic `input[type="text"]` rule, preventing the search icon from overlapping the text cursor and placeholder.
+
 ---
 
 ## [v1.5.3] - 2026-10-16
